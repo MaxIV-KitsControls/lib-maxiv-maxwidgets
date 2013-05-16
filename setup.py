@@ -57,7 +57,11 @@ class install_data(_install_data):
 
     def _create_env_script(self):
         install_cmd = self.get_finalized_command('install')
+        root   = getattr(install_cmd, 'root')
         libdir = getattr(install_cmd, 'install_lib')
+
+        if root is not None:
+            libdir = os.sep + os.path.relpath(libdir,root)
         extra_taurus_paths = set()
                 
         for package in packages:
