@@ -82,7 +82,7 @@ class install_data(_install_data):
         _install_data.run(self)
 
 setup(name = 'python-maxwidgets',
-      version = '0.1',
+      version = '0.2',
       description = 'A collection of reusable Taurus widgets',
       packages = packages,
       package_dir = {'maxwidgets' : 'src'},
