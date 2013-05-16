@@ -26,11 +26,6 @@ class MAXLineEdit (TaurusValueLineEdit):
         TaurusValueLineEdit._stepBy(self, steps*delta)
         self.setCursorPosition(len(self.text()) - cursor)
 
-    def _onEditingFinished(self):
-        print '_onEditingFinished()'
-        if self._autoApply:
-            self.writeValue()
-
     @classmethod
     def getQtDesignerPluginInfo(cls):
         ret = TaurusValueLineEdit.getQtDesignerPluginInfo()
