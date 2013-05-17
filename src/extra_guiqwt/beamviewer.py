@@ -118,6 +118,10 @@ class BeamViewer(ImageWindow, TaurusBaseWidget):
         self.image = make.image(taurusmodel='%s/%s' % (model, 'VideoImage'))
         plot.add_item(self.image)
 
+        self.connect(self.image.getSignaller(),
+                     Qt.SIGNAL("dataChanged"),
+                     self.update_cross_sections)
+
     @classmethod
     def getQtDesignerPluginInfo(cls):
         ret = TaurusBaseWidget.getQtDesignerPluginInfo()
