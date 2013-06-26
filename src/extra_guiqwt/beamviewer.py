@@ -1,90 +1,25 @@
-from guiqwt.plot import ImageWindow
-from guiqwt.tools import CommandTool, DefaultToolbarID
-
 import taurus
+import PyTango
+
+from guiqwt.plot import ImageWindow
+
 from taurus.qt import Qt
-from taurus.qt.qtgui.resource import getIcon
 from taurus.qt.qtgui.base import TaurusBaseWidget
 from taurus.qt.qtgui.extra_guiqwt.builder import make
+from taurus.qt.qtgui.dialog import TaurusMessageBox
 
-from maxwidgets.extra_guiqwt.ui.ui_CameraSettingsDialog import Ui_CameraSettingsDialog
+#from tools import StartTool, StopTool, SettingsTool
+from maxwidgets.extra_guiqwt.tools import StartTool, StopTool, SettingsTool
 
-VIDEO_MODES = {'Y8'  : 0,
-               'Y16' : 1}
-
-TRIGGER_MODES = {'INTERNAL' : 0,
-                 'EXTERNAL' : 2}
-
-class StartTool(CommandTool):
-    def __init__(self, manager, toolbar_id=DefaultToolbarID):
-        super(StartTool,self).__init__(manager, "Start",
-                                       getIcon(":/actions/media_playback_start.svg"),
-                                       toolbar_id=toolbar_id)
-
-    def activate_command(self, plot, checked):
-        bv_dev = self.manager.getModelObj()
+def alert_problems(meth):
+    def _alert_problems(self, *args, **kws):
         try:
-            bv_dev.Start()
-        except Exception, e:
-            self.manager.handleException(e)
-                    
-
-class StopTool(CommandTool):
-    def __init__(self, manager, toolbar_id=DefaultToolbarID):
-        super(StopTool,self).__init__(manager, "Stop",
-                                      getIcon(":/actions/media_playback_pause.svg"),
-                                      toolbar_id=toolbar_id)
-
-    def activate_command(self, plot, checked):
-        bv_dev = self.manager.getModelObj()
-        try:
-            bv_dev.Stop()
-        except Exception, e:
-            self.manager.handleException(e)
-        
-        
-class SettingsTool(CommandTool):
-    def __init__(self, manager, toolbar_id=DefaultToolbarID):
-        super(SettingsTool,self).__init__(manager, "Camera Settings...",
-                                          getIcon(":/designer/toolbutton.png"),
-                                          toolbar_id=toolbar_id)
-        self.dialog = CameraSettingsDialog(manager)
-        
-    def activate_command(self, plot, checked):
-        self.dialog.setModel(self.manager.getModel())
-        self.dialog.show()
-
-
-class CameraSettingsDialog(Qt.QDialog):
-    
-    def __init__(self, parent=None):
-        Qt.QDialog.__init__(self, parent)
-
-        self.ui = Ui_CameraSettingsDialog()
-        self.ui.setupUi(self) 
-        
-        self.ui.expTimeLineEdit.setUseParentModel(True)
-        self.ui.expTimeLineEdit.setAutoApply(True)
-        self.ui.expTimeLineEdit.setModel('/Exposure')
-
-        self.ui.gainLineEdit.setUseParentModel(True)
-        self.ui.gainLineEdit.setAutoApply(True)
-        self.ui.gainLineEdit.setModel('/Gain')
-
-        self.ui.videoModeComboBox.setUseParentModel(True)
-        self.ui.videoModeComboBox.setAutoApply(True)
-        self.ui.videoModeComboBox.setModel('/VideoMode')
-
-        self.ui.triggerModeComboBox.setUseParentModel(True)
-        self.ui.triggerModeComboBox.setAutoApply(True)
-        self.ui.triggerModeComboBox.setModel('/TriggerMode')
-
-        self.ui.videoModeComboBox.setValueNames(VIDEO_MODES.items())
-        self.ui.triggerModeComboBox.setValueNames(TRIGGER_MODES.items())
-
-    def setModel(self, model):
-        self.ui.taurusWidget.setModel(model)
-
+            return meth(self, *args, **kws)
+        except Exception:
+            dialog = TaurusMessageBox()
+            dialog.setError()
+            dialog.show()
+    return _alert_problems
 
 class BeamViewer(ImageWindow, TaurusBaseWidget):
     
@@ -92,7 +27,7 @@ class BeamViewer(ImageWindow, TaurusBaseWidget):
         self.call__init__(ImageWindow, *args, **kwargs)
         self.call__init__(TaurusBaseWidget, self.__class__.__name__)
         self.image = None
-        
+     
     def register_tools(self):
         self.add_tool(StartTool)
         self.add_tool(StopTool)
@@ -104,24 +39,53 @@ class BeamViewer(ImageWindow, TaurusBaseWidget):
         self.add_separator_tool()
         self.register_other_tools()
         self.get_default_tool().activate()
-                
+
     def getModelClass(self):
         return taurus.core.TaurusDevice
-
+  
+    @alert_problems
     def setModel(self, model):
         TaurusBaseWidget.setModel(self, model)
-
         plot = self.get_plot()
-        if self.image is not None:
-            plot.del_item(self.image)
-        
-        self.image = make.image(taurusmodel='%s/%s' % (model, 'VideoImage'))
-        plot.add_item(self.image)
 
+        if self.image is not None:
+            self.disconnect(self.image.getSignaller(),
+                            Qt.SIGNAL("dataChanged"),
+                            self.update_cross_sections)
+            plot.del_item(self.image)
+            del self.image
+
+        if model is None:
+            return
+
+        beamviewer = self.getPluginDevice('beamviewer')
+        if beamviewer:
+            image_attr = '%s/%s' % (beamviewer.name(), 'VideoImage')
+        else:
+            image_attr = '%s/%s' % (model, 'video_last_image')
+
+        self.image = make.image(taurusmodel=image_attr, interpolation='nearest')
+        plot.add_item(self.image)
+        
         self.connect(self.image.getSignaller(),
                      Qt.SIGNAL("dataChanged"),
                      self.update_cross_sections)
 
+    @alert_problems
+    def getCamera(self):
+        #return self.getModelObj()
+        model = self.getModel()
+        return PyTango.DeviceProxy(model) if model else None
+    
+    @alert_problems
+    def getPluginDevice(self, name):
+        try:
+            dev_name = self.getModelObj().getPluginDeviceNameFromType(name)    
+        except:
+            return None
+        #return taurus.Device(dev_name) if dev_name else None
+        return PyTango.DeviceProxy(dev_name) if dev_name else None
+               
     @classmethod
     def getQtDesignerPluginInfo(cls):
         ret = TaurusBaseWidget.getQtDesignerPluginInfo()
@@ -129,14 +93,14 @@ class BeamViewer(ImageWindow, TaurusBaseWidget):
         ret['module'] = 'maxwidgets.extra_guiqwt'
         ret['icon'] = ':/designer/qwtplot.png'
         return ret
-
+        
 def main():
     from taurus.qt.qtgui.application import TaurusApplication
     from taurus.core.util import argparse
     import sys
 
     parser = argparse.get_taurus_parser()
-    parser.usage = "%prog [options] <BeamViewer device>"
+    parser.usage = "%prog [options] <LimaCCDs device>"
 
     app = TaurusApplication(sys.argv, cmd_line_parser=parser, 
                             app_name="BeamViewer", app_version="1.0")

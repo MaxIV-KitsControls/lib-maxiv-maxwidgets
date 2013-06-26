@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'CameraSettingsDialog.ui'
 #
-# Created: Thu May 16 19:11:37 2013
+# Created: Mon Jun 10 17:03:11 2013
 #      by: PyQt4 UI code generator 4.10.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -36,9 +36,9 @@ class Ui_CameraSettingsDialog(object):
         self.label_3 = QtGui.QLabel(self.taurusWidget)
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.gridLayout.addWidget(self.label_3, 0, 0, 1, 1)
-        self.videoModeComboBox = TaurusValueComboBox(self.taurusWidget)
-        self.videoModeComboBox.setObjectName(_fromUtf8("videoModeComboBox"))
-        self.gridLayout.addWidget(self.videoModeComboBox, 0, 1, 1, 1)
+        self.imageTypeComboBox = TaurusValueComboBox(self.taurusWidget)
+        self.imageTypeComboBox.setObjectName(_fromUtf8("imageTypeComboBox"))
+        self.gridLayout.addWidget(self.imageTypeComboBox, 0, 1, 1, 1)
         self.label_4 = QtGui.QLabel(self.taurusWidget)
         self.label_4.setObjectName(_fromUtf8("label_4"))
         self.gridLayout.addWidget(self.label_4, 1, 0, 1, 1)
@@ -66,10 +66,10 @@ class Ui_CameraSettingsDialog(object):
 
     def retranslateUi(self, CameraSettingsDialog):
         CameraSettingsDialog.setWindowTitle(_translate("CameraSettingsDialog", "Camera Settings", None))
-        self.label_3.setText(_translate("CameraSettingsDialog", "Video Mode", None))
+        self.label_3.setText(_translate("CameraSettingsDialog", "Image Type", None))
         self.label_4.setText(_translate("CameraSettingsDialog", "Trigger Mode", None))
         self.label_5.setText(_translate("CameraSettingsDialog", "Exposure (ms)", None))
-        self.label_6.setText(_translate("CameraSettingsDialog", "Gain (%)", None))
+        self.label_6.setText(_translate("CameraSettingsDialog", "Gain (dB)", None))
 
 from taurus.qt.qtgui.panel import TaurusWidget
 from taurus.qt.qtgui.input import TaurusValueComboBox
