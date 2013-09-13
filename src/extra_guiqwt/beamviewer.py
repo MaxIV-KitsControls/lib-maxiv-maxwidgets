@@ -2,10 +2,11 @@ import taurus
 import PyTango
 
 from guiqwt.plot import ImageWindow
+from guiqwt.styles import ImageParam
 
 from taurus.qt import Qt
 from taurus.qt.qtgui.base import TaurusBaseWidget
-from taurus.qt.qtgui.extra_guiqwt.builder import make
+from taurus.qt.qtgui.extra_guiqwt.image import TaurusEncodedImageItem
 from taurus.qt.qtgui.dialog import TaurusMessageBox
 
 #from tools import StartTool, StopTool, SettingsTool
@@ -20,6 +21,22 @@ def alert_problems(meth):
             dialog.setError()
             dialog.show()
     return _alert_problems
+
+
+class LimaVideoImageItem(TaurusEncodedImageItem):
+    dtype = None
+
+    def set_data(self, data, **kwargs):
+        TaurusEncodedImageItem.set_data(self, data, **kwargs)
+        
+        if self.data is None:
+            return
+        
+        if self.data.dtype != self.dtype:
+            """ Pixel data type has changed. Update LUT range """
+            self.dtype = self.data.dtype
+            self.set_lut_range(self.get_lut_range_max())
+
 
 class BeamViewer(ImageWindow, TaurusBaseWidget):
     
@@ -64,12 +81,18 @@ class BeamViewer(ImageWindow, TaurusBaseWidget):
         else:
             image_attr = '%s/%s' % (model, 'video_last_image')
 
-        self.image = make.image(taurusmodel=image_attr, interpolation='nearest')
-        plot.add_item(self.image)
+        param = ImageParam()
+        param.interpolation = 0 # None (nearest pixel)
+
+        self.image = LimaVideoImageItem(param)
+        self.image.setModel(image_attr)
         
         self.connect(self.image.getSignaller(),
                      Qt.SIGNAL("dataChanged"),
                      self.update_cross_sections)
+        
+        plot.add_item(self.image)
+
 
     @alert_problems
     def getCamera(self):
@@ -94,6 +117,7 @@ class BeamViewer(ImageWindow, TaurusBaseWidget):
         ret['icon'] = ':/designer/qwtplot.png'
         return ret
         
+
 def main():
     from taurus.qt.qtgui.application import TaurusApplication
     from taurus.core.util import argparse
