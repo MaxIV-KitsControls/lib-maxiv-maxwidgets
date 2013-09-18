@@ -96,9 +96,7 @@ class BeamViewer(ImageWindow, TaurusBaseWidget):
 
     @alert_problems
     def getCamera(self):
-        #return self.getModelObj()
-        model = self.getModel()
-        return PyTango.DeviceProxy(model) if model else None
+        return self.getModelObj()
     
     @alert_problems
     def getPluginDevice(self, name):
@@ -106,8 +104,7 @@ class BeamViewer(ImageWindow, TaurusBaseWidget):
             dev_name = self.getModelObj().getPluginDeviceNameFromType(name)    
         except:
             return None
-        #return taurus.Device(dev_name) if dev_name else None
-        return PyTango.DeviceProxy(dev_name) if dev_name else None
+        return taurus.Device(dev_name) if dev_name else None
                
     @classmethod
     def getQtDesignerPluginInfo(cls):

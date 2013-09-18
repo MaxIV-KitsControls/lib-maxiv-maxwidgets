@@ -54,7 +54,7 @@ class StartTool(CommandTool):
         camera = self.manager.getCamera()
         beamviewer = self.manager.getPluginDevice('beamviewer')
         if camera and camera.acq_status != 'Running':
-            camera.acq_nb_frames = 0
+            camera.getAttribute('acq_nb_frames').write(0)
             camera.prepareacq()
             camera.startAcq()
         if beamviewer:
@@ -87,5 +87,5 @@ class SettingsTool(CommandTool):
         beamviewer = self.manager.getPluginDevice('beamviewer')
         if not beamviewer:
             return
-        self.settingsDialog.setModel(beamviewer.name())
+        self.settingsDialog.setModel(beamviewer)
         self.settingsDialog.show()
