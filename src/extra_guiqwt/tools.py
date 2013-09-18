@@ -87,5 +87,5 @@ class SettingsTool(CommandTool):
         beamviewer = self.manager.getPluginDevice('beamviewer')
         if not beamviewer:
             return
-        self.settingsDialog.setModel(beamviewer)
+        self.settingsDialog.setModel(beamviewer.getFullName())
         self.settingsDialog.show()
