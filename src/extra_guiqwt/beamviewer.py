@@ -1,5 +1,4 @@
 import taurus
-import PyTango
 
 from guiqwt.plot import ImageWindow
 from guiqwt.styles import ImageParam
