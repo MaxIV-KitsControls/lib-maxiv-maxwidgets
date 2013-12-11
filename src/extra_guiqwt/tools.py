@@ -7,6 +7,7 @@ from taurus.qt.qtgui.resource import getIcon
 from maxwidgets.extra_guiqwt.ui.ui_CameraSettingsDialog import Ui_CameraSettingsDialog
 
 IMAGE_TYPES = {'Bpp8'  : 0,
+               'Bpp12' : 4,
                'Bpp16' : 8}
 
 TRIGGER_MODES = {'INTERNAL' : 0,
