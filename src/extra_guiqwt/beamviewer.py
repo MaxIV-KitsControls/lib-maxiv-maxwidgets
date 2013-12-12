@@ -43,7 +43,11 @@ class BeamViewer(ImageWindow, TaurusBaseWidget):
         self.call__init__(ImageWindow, *args, **kwargs)
         self.call__init__(TaurusBaseWidget, self.__class__.__name__)
         self.image = None
-     
+        self.acq_status = ''
+        self.acq_status_attr = None
+        self.frame_number = -1
+        self.frame_number_attr = None
+                
     def register_tools(self):
         self.add_tool(StartTool)
         self.add_tool(StopTool)
@@ -70,15 +74,17 @@ class BeamViewer(ImageWindow, TaurusBaseWidget):
                             self.update_cross_sections)
             plot.del_item(self.image)
             del self.image
+        
+        self.unregisterEvents()
 
         if model is None:
             return
 
         beamviewer = self.getPluginDevice('beamviewer')
-        if beamviewer:
-            image_attr = '%s/%s' % (beamviewer.name(), 'VideoImage')
-        else:
-            image_attr = '%s/%s' % (model, 'video_last_image')
+        if not beamviewer:
+            return
+
+        image_attr = beamviewer.getAttribute('VideoImage')
 
         param = ImageParam()
         param.interpolation = 0 # None (nearest pixel)
@@ -89,18 +95,48 @@ class BeamViewer(ImageWindow, TaurusBaseWidget):
         self.connect(self.image.getSignaller(),
                      Qt.SIGNAL("dataChanged"),
                      self.update_cross_sections)
-        
+
         plot.add_item(self.image)
+        self.registerEvents()
+    
+    def registerEvents(self):
+        camera = self.getCamera()
+        beamviewer = self.getPluginDevice('beamviewer')
+        
+        self.acq_status_attr = camera.getAttribute('acq_status')
+        self.acq_status_attr.addListener(self)
+        
+        self.frame_number_attr = beamviewer.getAttribute('FrameNumber')
+        self.frame_number_attr.addListener(self)
 
+    def unregisterEvents(self):
+        if self.acq_status_attr is not None:
+            self.acq_status_attr.removeListener(self)
+            self.acq_status_attr = None
+            
+        if self.frame_number_attr is not None:
+            self.frame_number_attr.removeListener(self)
+            self.frame_number_attr = None
 
-    @alert_problems
+    def handleEvent(self, src, evt_type, evt_value):
+        if not hasattr(evt_value, 'value'):
+            return
+
+        if src is self.acq_status_attr:
+            self.acq_status = evt_value.value
+
+        if src is self.frame_number_attr:
+            self.frame_number = evt_value.value
+                
+        msg = 'Camera status: %s  Frame number: %d' % (self.acq_status, self.frame_number)
+        self.statusBar().showMessage(msg)
+    
     def getCamera(self):
         return self.getModelObj()
     
-    @alert_problems
     def getPluginDevice(self, name):
         try:
-            dev_name = self.getModelObj().getPluginDeviceNameFromType(name)    
+            dev_name = self.getModelObj().getPluginDeviceNameFromType(name)
         except:
             return None
         return taurus.Device(dev_name) if dev_name else None
@@ -127,7 +163,7 @@ def main():
         
     args = app.get_command_line_args()
 
-    widget = BeamViewer(toolbar=True)
+    widget = BeamViewer(toolbar=True, options={'show_contrast' : True})
 
     if len(args) < 1:
         parser.print_help()
