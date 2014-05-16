@@ -84,10 +84,11 @@ class YAGScreenTVReadWidget(TaurusWidget):
 
         led.setUseParentModel(True)
         led.setModel('/State')
-        led.setAlignment(Qt.Qt.AlignHCenter | Qt.Qt.AlignVCenter)
         led.getFormatedToolTip = self.getFormatedToolTip
+        led.setSizePolicy(Qt.QSizePolicy.Fixed, Qt.QSizePolicy.Fixed)
 
         self.layout().addWidget(led)
+        self.layout().addStretch()
 
     def getFormatedToolTip(self, cache=False):
         return self.taurusValueBuddy().getFormatedToolTip(cache)
