@@ -18,8 +18,8 @@ from taurus.qt.qtgui.display.taurusled import _TaurusLedController
 class _YAGLedController(_TaurusLedController):
     """
     taurus uses the same color (green) for both INSERT and EXTRACT. This
-    is probably a bug. The ATK colors are white or INSERT and green for EXTRACT.
-    Override the color scheme here until it has been fixed upstrean.
+    is probably a bug. The ATK colors are white for INSERT and green for EXTRACT.
+    Override the color scheme here until it has been fixed upstream.
     """
     LedMap = {State.INSERT:  (True,  "white", False),
               State.EXTRACT: (True,  "green", False),
