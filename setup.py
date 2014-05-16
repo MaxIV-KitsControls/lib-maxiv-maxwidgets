@@ -9,6 +9,7 @@ packages= [ 'maxwidgets'
           , 'maxwidgets.extra_guiqwt'
           , 'maxwidgets.extra_guiqwt.ui'
           , 'maxwidgets.input'
+          , 'maxwidgets.panel'
           ]
 
 env_script = 'maxwidgets.sh'
@@ -82,7 +83,7 @@ class install_data(_install_data):
         _install_data.run(self)
 
 setup(name = 'python-maxwidgets',
-      version = '0.7',
+      version = '0.8.0',
       description = 'A collection of reusable Taurus widgets',
       packages = packages,
       package_dir = {'maxwidgets' : 'src'},
