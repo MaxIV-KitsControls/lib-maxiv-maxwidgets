@@ -86,6 +86,7 @@ class GammaSPCeTVReadWidget(TaurusWidget):
         self.led.setUseParentModel(True)
         self.led.setModel('/State')
         self.led.getFormatedToolTip = self.getFormatedToolTip
+        self.led.setSizePolicy(Qt.QSizePolicy.Fixed, Qt.QSizePolicy.Fixed)
 
         self.label = ExpandingLabel()
         self.label.setUseParentModel(True)
