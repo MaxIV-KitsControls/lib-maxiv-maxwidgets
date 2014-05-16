@@ -1,8 +1,6 @@
 import PyTango
 import sys
-import taurus
 from taurus.qt import Qt, QtGui
-from taurus.core import TaurusEventType
 from taurus.qt.qtgui.container import TaurusWidget
 from taurus.qt.qtgui.display import TaurusLed
 from taurus.qt.qtgui.input import TaurusValueLineEdit
@@ -14,51 +12,10 @@ from taurus.qt.qtgui.dialog import TaurusMessageBox
 from functools import partial
 
 
-class TaurusAttributeListener(Qt.QObject):
-    """
-    A class that recieves events on tango attribute changes.
-    If that is the case it emits a signal with the event's value.
-    """
-    def __init__(self):
-        Qt.QObject.__init__(self)
+class GammaSPCeTVLabelWidget(DefaultLabelWidget):
 
-    def eventReceived(self, evt_src, evt_type, evt_value):
-        if evt_type is TaurusEventType.Error:
-            print 'error', evt_src, evt_type, evt_value
-
-        if evt_type not in [TaurusEventType.Change, TaurusEventType.Periodic]:
-            return
-        value = evt_value.value
-        self.emit(Qt.SIGNAL('eventReceived'), value)
-
-
-class GammaSPCeTVLabelWidget(TaurusWidget):
-
-    def __init__(self, *args):
-        TaurusWidget.__init__(self, *args)
-        self.setLayout(QtGui.QHBoxLayout())
-        self.layout().setMargin(0)
-        self.layout().setSpacing(0)
-
-        self.label = DefaultLabelWidget(self)
-        self.label.contextMenuEvent = self.contextMenuEvent
-        self.label.getFormatedToolTip = self.getFormatedToolTip
-
-        self.led = TaurusLed(self)
-        self.led.setAlignment(Qt.Qt.AlignRight | Qt.Qt.AlignVCenter)
-        self.led.contextMenuEvent = self.contextMenuEvent
-        self.led.getFormatedToolTip = self.getFormatedToolTip
-
-        self.layout().addWidget(self.label)
-        self.layout().addWidget(self.led)
-
-    def setModel(self, model):
-        TaurusWidget.setModel(self, model)
-
-        self.label.setModel(model)
-        self.label.taurusValueBuddy = self.taurusValueBuddy
-
-        self.led.setModel(model + '/state')
+    def getFormatedToolTip(self, cache=False):
+        return self.taurusValueBuddy().getFormatedToolTip(cache)
 
     def contextMenuEvent(self, event):
         action_display_current = Qt.QAction(self)
@@ -116,41 +73,33 @@ class GammaSPCeTVLabelWidget(TaurusWidget):
         self.taurusValueBuddy().showDevicePanel()
         event.accept()
 
+
+class GammaSPCeTVReadWidget(TaurusWidget):
+
+    def __init__(self, *args):
+        TaurusWidget.__init__(self, *args)
+        self.setLayout(QtGui.QHBoxLayout())
+        self.layout().setMargin(0)
+        self.layout().setSpacing(0)
+
+        self.led = TaurusLed(self)
+        self.led.setUseParentModel(True)
+        self.led.setModel('/State')
+        self.led.getFormatedToolTip = self.getFormatedToolTip
+
+        self.label = ExpandingLabel()
+        self.label.setUseParentModel(True)
+
+        self.layout().addWidget(self.led)
+        self.layout().addWidget(self.label)
+
     def getFormatedToolTip(self, cache=False):
-        tool_tip = [('name', self.getModel())]
-        status_info = ''
-
-        obj = self.taurusValueBuddy().getModelObj()
-        if obj is not None:
-            try:
-                state = obj.getAttribute('State').read().value
-                status = obj.getAttribute('Status').read().value
-            except PyTango.DevFailed:
-                return
-            tool_tip.append(('state', state))
-            status_lines = status.split('\n')
-            status_info = '<TABLE width="500" border="0" cellpadding="1" cellspacing="0"><TR><TD WIDTH="80" ALIGN="RIGHT" VALIGN="MIDDLE"><B>Status:</B></TD><TD>' + status_lines[0] + '</TD></TR>'
-            for status_line in status_lines[1:]:
-                status_info += '<TR><TD></TD><TD>' + status_line + '</TD></TR>'
-            status_info += '</TABLE>'
-
-        return self.toolTipObjToStr(tool_tip) + status_info
-
-    def controllerUpdate(self):
-        for w in [self.label, self.led]:
-            ctrl = w.controller()
-            if ctrl is not None:
-                ctrl.update()
-
-
-class GammaSPCeTVReadWidget(ExpandingLabel):
+        return self.taurusValueBuddy().getFormatedToolTip(cache)
 
     def setModel(self, model):
-        if not model:
-            ExpandingLabel.setModel(self, '')
-        else:
-            display_attr = self.taurusValueBuddy().getDisplayAttr()
-            ExpandingLabel.setModel(self, model + '/' + display_attr)
+        TaurusWidget.setModel(self, model)
+        display_attr = self.taurusValueBuddy().getDisplayAttr()
+        self.label.setModel('/' + display_attr)
 
 
 class GammaSPCeTVWriteWidget(TaurusValueLineEdit):
@@ -161,6 +110,7 @@ class GammaSPCeTVWriteWidget(TaurusValueLineEdit):
         else:
             display_attr = self.taurusValueBuddy().getDisplayAttr()
             TaurusValueLineEdit.setModel(self, model + '/' + display_attr)
+
 
 class GammaSPCeTVUnitsWidget(DefaultUnitsWidget):
 
@@ -183,33 +133,26 @@ class GammaSPCeTV(TaurusValue):
         self.setUnitsWidgetClass(GammaSPCeTVUnitsWidget)
         self.setLabelConfig('dev_name')
 
-        self.device = None
-        self.status_listener = None
+    def getFormatedToolTip(self, cache=False):
+        tool_tip = [('name', self.getModel())]
+        status_info = ''
 
-    def setModel(self, model):
-        TaurusValue.setModel(self, model)
-        try:
-            # disconnect signals
-            if self.status_listener is not None:
-                self.disconnect(self.status_listener, Qt.SIGNAL('eventReceived'), self.updateStatus)
-
-            # remove listeners
-            if self.device is not None:
-                self.device.getAttribute('Status').removeListener(self.status_listener)
-
-            if model == '' or model is None:
-                self.device = None
+        obj = self.getModelObj()
+        if obj is not None:
+            try:
+                state = obj.getAttribute('State').read().value
+                status = obj.getAttribute('Status').read().value
+            except PyTango.DevFailed:
                 return
+            tool_tip.append(('state', state))
+            # hack for displaying multi-line status messages
+            status_lines = status.split('\n')
+            status_info = '<TABLE width="500" border="0" cellpadding="1" cellspacing="0"><TR><TD WIDTH="80" ALIGN="RIGHT" VALIGN="MIDDLE"><B>Status:</B></TD><TD>' + status_lines[0] + '</TD></TR>'
+            for status_line in status_lines[1:]:
+                status_info += '<TR><TD></TD><TD>' + status_line + '</TD></TR>'
+            status_info += '</TABLE>'
 
-            self.device = taurus.Device(model)
-            self.status_listener = TaurusAttributeListener()
-            self.connect(self.status_listener, Qt.SIGNAL('eventReceived'), self.updateStatus)
-            self.device.getAttribute('Status').addListener(self.status_listener)
-
-        except Exception, e:
-            self.warning("Exception caught while setting model: %s", repr(e))
-            self.device = None
-            return
+        return self.toolTipObjToStr(tool_tip) + status_info
 
     def getDisplayAttr(self):
         return self.display_attr
@@ -239,34 +182,34 @@ class GammaSPCeTV(TaurusValue):
         dialog.show()
 
     def start(self):
-        if self.device is None:
+        dev = self.getModelObj()
+        if not dev:
             return
         try:
-            self.device.Start()
+            dev.Start()
         except:
             msgbox = TaurusMessageBox(*sys.exc_info())
             msgbox.exec_()
 
     def stop(self):
-        if self.device is None:
+        dev = self.getModelObj()
+        if not dev:
             return
         try:
-            self.device.Stop()
+            dev.Stop()
         except:
             msgbox = TaurusMessageBox(*sys.exc_info())
             msgbox.exec_()
 
     def reconnect(self):
-        if self.device is None:
+        dev = self.getModelObj()
+        if not dev:
             return
         try:
-            self.device.Init()
+            dev.Init()
         except:
             msgbox = TaurusMessageBox(*sys.exc_info())
             msgbox.exec_()
-
-    def updateStatus(self):
-        self.labelWidget().controllerUpdate()
 
 
 def main():
