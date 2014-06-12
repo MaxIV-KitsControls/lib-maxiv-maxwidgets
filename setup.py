@@ -9,6 +9,7 @@ packages= [ 'maxwidgets'
           , 'maxwidgets.extra_guiqwt'
           , 'maxwidgets.extra_guiqwt.ui'
           , 'maxwidgets.input'
+          , 'maxwidgets.display'
           , 'maxwidgets.panel'
           ]
 
@@ -31,7 +32,7 @@ def ui_to_py(arg, dirname, names):
     for name in names:
         if not name.endswith('.ui'):
             continue
-        
+
         pyname = 'ui_' + name.replace('.ui', '.py')
 
         cmd = 'taurusuic4 -o %s %s' % (pyname, name)
@@ -40,7 +41,7 @@ def ui_to_py(arg, dirname, names):
         src = os.path.join(dirname, name)
         dst = os.path.join(dirname, pyname)
         print ok and "[OK]" or "[FAIL]", src, '->', dst
-        
+
     os.chdir(cwd)
 
 
@@ -48,7 +49,7 @@ class build_py(_build_py):
 
     def _build_ui_modules(self):
         os.path.walk('src', ui_to_py, None)
-        
+
     def run(self):
         self._build_ui_modules()
         _build_py.run(self)
@@ -64,7 +65,7 @@ class install_data(_install_data):
         if root is not None:
             libdir = os.sep + os.path.relpath(libdir,root)
         extra_taurus_paths = set()
-                
+
         for package in packages:
             try:
                 pkg, subdir = package.split('.')[:2]
@@ -77,13 +78,13 @@ class install_data(_install_data):
         with open(env_script, 'w') as ofile:
             text = env_script_src.format(extra_taurus_paths)
             ofile.write(text)
-        
+
     def run(self):
         self._create_env_script()
         _install_data.run(self)
 
 setup(name = 'python-maxwidgets',
-      version = '0.8.1',
+      version = '0.8.2',
       description = 'A collection of reusable Taurus widgets',
       packages = packages,
       package_dir = {'maxwidgets' : 'src'},
