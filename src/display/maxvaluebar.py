@@ -230,10 +230,8 @@ class MAXValueBar(TaurusWidget):
         '''returns the number of decimal digits from a format string
         (or None if they are not defined)'''
         try:
-            if fmt[-1].lower() in ['f', 'g'] and '.' in fmt:
+            if fmt[-1].lower() in 'fg' and '.' in fmt:
                 return int(fmt[:-1].split('.')[-1])
-            else:
-                return None
         except:
             return None
 
