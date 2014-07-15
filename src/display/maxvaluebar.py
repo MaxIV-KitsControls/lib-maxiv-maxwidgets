@@ -40,25 +40,32 @@ class ValueBarWidget(QtGui.QWidget):
         self.pad = 10
 
     def setValue(self, value, write_value=None):
-        print value
-        self.value = value
-        self.write_value = write_value
-        self.repaint()
+        if value != self.value:
+            print "setValue", value
+            self.value = value
+            if write_value != self.write_value:
+                self.write_value = write_value
+            self.repaint()
 
     def setWriteValue(self, value):
-        self.write_value = value
+        if value != self.write_value:
+            print "setWriteValue", value
+            self.write_value = value
+            self.repaint()
 
     def setRange(self, min_value, max_value):
         self.setMinimum(min_value)
         self.setMaximum(max_value)
 
     def setMinimum(self, value):
-        self.min_value = value
-        self.repaint()
+        if value is not None:
+            self.min_value = value
+            self.repaint()
 
     def setMaximum(self, value):
-        self.max_value = value
-        self.repaint()
+        if value is not None:
+            self.max_value = value
+            self.repaint()
 
     def setWarningLow(self, value):
         self.warn_low = value
@@ -77,6 +84,8 @@ class ValueBarWidget(QtGui.QWidget):
         self.repaint()
 
     def _get_ticks(self):
+        if self.min_value < 0 < self.max_value:
+            return [self.min_value, 0, self.max_value]
         return [self.min_value, self.max_value]
 
     def paintEvent(self, e):
@@ -91,11 +100,14 @@ class ValueBarWidget(QtGui.QWidget):
         qp.setPen(QtGui.QColor(0, 0, 0))
         qp.drawLine(w, self.pad, w, h+self.pad)
         for i, tick in enumerate(ticks):
-            qp.drawLine(w, h - i*h/n + self.pad , w+5, h - i*h/n + self.pad)
+            qp.drawLine(QtCore.QPointF(w, h - i*h/n + self.pad),
+                        QtCore.QPointF(w+5, h - i*h/n + self.pad))
             qp.drawText(w+self.pad, h - i*h/n + self.pad + fw/2, str(tick))
 
     @contextmanager
     def _scale(self, qp):
+        """A context manager to set up a QPainter with the current scale as
+        transform."""
         size = self.size()
         h = size.height() - 2*self.pad
 
@@ -123,46 +135,58 @@ class ValueBarWidget(QtGui.QWidget):
             # frame
             qp.setPen(QtCore.Qt.transparent)
             qp.setBrush(QtGui.QColor(255, 255, 255))
-            qp.drawRect(0, self.min_value, w, self.max_value - self.min_value)
+            # need to use e.g. QRectF, or the coordinates get truncated to ints
+            qp.drawRect(QtCore.QRectF(0, self.min_value,
+                                      w, self.max_value - self.min_value))
 
-            # warning
+            # Warning levels
             if self.warn_high is not None:
                 qp.setBrush(QtGui.QColor(255, 200, 150))
-                qp.drawRect(0, self.warn_high, w, self.max_value - self.warn_high)
-
+                qp.drawRect(QtCore.QRectF(0, self.warn_high,
+                                          w, self.max_value - self.warn_high))
             if self.warn_low is not None:
                 qp.setBrush(QtGui.QColor(255, 200, 150))
-                qp.drawRect(0, self.min_value, w, abs(self.min_value - self.warn_low))
+                qp.drawRect(QtCore.QRectF(0, self.min_value,
+                                          w, abs(self.min_value - self.warn_low)))
 
-            # alarm
+            # Alarm levels
             if self.alarm_high is not None:
                 qp.setBrush(QtGui.QColor(255, 170, 170))
-                qp.drawRect(0, self.alarm_high, w, self.max_value - self.alarm_high)
-
+                qp.drawRect(QtCore.QRectF(0, self.alarm_high,
+                                          w, self.max_value - self.alarm_high))
             if self.alarm_low is not None:
                 qp.setBrush(QtGui.QColor(255, 170, 170))
-                qp.drawRect(0, self.min_value, w, abs(self.min_value - self.alarm_low))
+                qp.drawRect(QtCore.QRectF(0, self.min_value,
+                                          w, abs(self.min_value - self.alarm_low)))
 
-            # value bar
+            # Value bar
             qp.setPen(QtGui.QColor(0, 200, 0))
             qp.setBrush(QtGui.QColor(0, 200, 0))
-            qp.drawRect(10, 0, w-2*self.pad, self.value)
+            qp.drawRect(QtCore.QRectF(10, 0, w-2*self.pad, self.value))
 
-            # write value line
+            # Write value line
             qp.setPen(QtGui.QColor(255, 0, 0))
             if self.write_value:
-                qp.drawLine(0, self.write_value, w, self.write_value)
+                qp.drawLine(QtCore.QPointF(0, self.write_value),
+                            QtCore.QPointF(w, self.write_value))
+                # # FIXME: Unfortunately the QPainter transform also transforms the font
+                # # size... find some way to write the current value on the axis
+                # qp.drawText(w + self.pad, self.write_value,
+                #             str(self.write_value))
 
-            # zero line
+            # Zero line
             qp.setPen(QtGui.QColor(0, 0, 0))
             if self.min_value < 0 < self.max_value:
-                qp.drawLine(0, 0, w + 5, 0)
+                qp.drawLine(QtCore.QPointF(0, 0), QtCore.QPointF(w + 5, 0))
 
         self._draw_scale(w, h, fw, fh, qp)
 
 
 def float_or_none(value):
-    return float(value) if (value and value != "Not specified") else None
+    try:
+        return float(value)
+    except ValueError:
+        return None
 
 
 class MAXValueBar(TaurusWidget):
@@ -214,6 +238,7 @@ class MAXValueBar(TaurusWidget):
             return None
 
     def updateConfig(self):
+        print self.model
         conf = Configuration("%s?configuration" % self.model)
         # Note: could be inefficient with lots of redraws?
         self.valuebar.setMaximum(float_or_none(conf.max_value))
@@ -230,7 +255,9 @@ class MAXValueBar(TaurusWidget):
     def handleEvent(self, evt_src, evt_type, evt_value):
         if evt_type in (PyTango.EventType.PERIODIC_EVENT,
                         PyTango.EventType.CHANGE_EVENT):
-            self.value_trigger.emit(evt_value.value, evt_value.w_value)
+            if (evt_value.value is not None and
+                    evt_value.w_value is not None):
+                self.value_trigger.emit(evt_value.value, evt_value.w_value)
 
     def wheelEvent(self, evt):
         # if not self.getEnableWheelEvent() or Qt.QLineEdit.isReadOnly(self):
@@ -250,7 +277,9 @@ class MAXValueBar(TaurusWidget):
 
         # change the value by 1 in the least significant digit according
         # to the configured format.
-        value = self.valuebar.write_value + numSteps*self._delta
+        value = max(self.valuebar.min_value,
+                    min(self.valuebar.max_value,
+                        self.valuebar.write_value + numSteps*self._delta))
         model.write(value)
         self.valuebar.setWriteValue(value)
 
