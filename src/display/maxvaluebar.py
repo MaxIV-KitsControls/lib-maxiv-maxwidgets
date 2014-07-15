@@ -41,7 +41,6 @@ class ValueBarWidget(QtGui.QWidget):
 
     def setValue(self, value, write_value=None):
         if value != self.value:
-            print "setValue", value
             self.value = value
             if write_value != self.write_value:
                 self.write_value = write_value
@@ -49,7 +48,6 @@ class ValueBarWidget(QtGui.QWidget):
 
     def setWriteValue(self, value):
         if value != self.write_value:
-            print "setWriteValue", value
             self.write_value = value
             self.repaint()
 
@@ -236,7 +234,6 @@ class MAXValueBar(TaurusWidget):
             return None
 
     def updateConfig(self):
-        print self.model
         conf = Configuration("%s?configuration" % self.model)
         # Note: could be inefficient with lots of redraws?
         self.valuebar.setMaximum(float_or_none(conf.max_value))
