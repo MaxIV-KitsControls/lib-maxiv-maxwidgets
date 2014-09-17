@@ -123,9 +123,9 @@ class IORUserPanel(TaurusWidget):
         self.gridLayout.addWidget(self.taurusForm2, 1, 0, 1, 2)
        
         #form with a custom combo box - can replace the standard IOR widget
-        self.comboBox = TaurusValueComboBox(self) 
-        self.comboBox.setAutoApply(True)
-        self.gridLayout.addWidget(self.comboBox, 2, 0, 1, 2)
+        #self.comboBox = TaurusValueComboBox(self) 
+        #self.comboBox.setAutoApply(True)
+        #self.gridLayout.addWidget(self.comboBox, 2, 0, 1, 2)
 
         #self.label = TaurusLabel(self) 
         #self.gridLayout.addWidget(self.label, 0, 1, 1, 1)
@@ -149,7 +149,7 @@ class IORUserPanel(TaurusWidget):
                 self.options = options
                 for opt in self.options:
                     self.dict[opt[0]] = opt[1]
-                    self.comboBox.setValueNames(self.options)
+                    #self.comboBox.setValueNames(self.options)
 
             #set the IOR widget
             self.taurusForm.setCustomWidgetMap(getattr(tauruscustomsettings,'T_FORM_CUSTOM_WIDGET_MAP',{}))
@@ -167,7 +167,7 @@ class IORUserPanel(TaurusWidget):
                     widget.writeWidget().setAutoApply(True)
 
                 #connect combo box changes to method below
-                self.connect(self.comboBox, QtCore.SIGNAL('currentIndexChanged(const int &)'), self.indexChanged)
+                #self.connect(self.comboBox, QtCore.SIGNAL('currentIndexChanged(const int &)'), self.indexChanged)
 
                 #fill label
                 #self.label.setModel(taurus.Attribute(ior+"/Value"))
@@ -176,13 +176,13 @@ class IORUserPanel(TaurusWidget):
                 #self.position_mot = taurus.Attribute(mot+"/Position") 
 
             #see what index the combo box should have
-            index = self.comboBox.findData(self.position_ior.read().value)
-            self.comboBox.setCurrentIndex(index)
+            #index = self.comboBox.findData(self.position_ior.read().value)
+            #self.comboBox.setCurrentIndex(index)
             
 
-    def indexChanged(self,index):
-        value = self.dict[str(self.comboBox.currentText())]
-        self.position_ior.write(value)
+    #def indexChanged(self,index):
+        #value = self.dict[str(self.comboBox.currentText())]
+        #self.position_ior.write(value)
 
 class MotorConfigPanel(TaurusWidget):
 
