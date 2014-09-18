@@ -4,7 +4,7 @@ from taurus.qt.qtgui.panel import TaurusWidget, TaurusForm
 from taurus.qt.qtgui.input import TaurusValueComboBox
 from taurus.qt.qtgui.display import TaurusLabel
 
-from taurus import tauruscustomsettings
+from taurus import TaurusCustomSettings
 import taurus
 
 class MotorPresets(TaurusWidget):
@@ -152,12 +152,12 @@ class IORUserPanel(TaurusWidget):
                     #self.comboBox.setValueNames(self.options)
 
             #set the IOR widget
-            self.taurusForm.setCustomWidgetMap(getattr(tauruscustomsettings,'T_FORM_CUSTOM_WIDGET_MAP',{}))
+            self.taurusForm.setCustomWidgetMap(getattr(TaurusCustomSettings,'T_FORM_CUSTOM_WIDGET_MAP',{}))
             self.taurusForm.setModel([self.ior_model])
 
 
             #set the motor widget
-            self.taurusForm2.setCustomWidgetMap(getattr(tauruscustomsettings,'T_FORM_CUSTOM_WIDGET_MAP',{}))
+            self.taurusForm2.setCustomWidgetMap(getattr(TaurusCustomSettings,'T_FORM_CUSTOM_WIDGET_MAP',{}))
             self.taurusForm2.setModel([self.mot_model])
 
             if self.firstcall:
