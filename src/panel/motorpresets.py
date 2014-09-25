@@ -4,8 +4,12 @@ from taurus.qt.qtgui.panel import TaurusWidget, TaurusForm
 from taurus.qt.qtgui.input import TaurusValueComboBox
 from taurus.qt.qtgui.display import TaurusLabel
 
-from taurus import TaurusCustomSettings
 import taurus
+try:
+    from taurus import tauruscustomsettings  # taurus 3.3
+except ImportError:
+    from taurus import TaurusCustomSettings  # taurus 3.0
+
 
 class MotorPresets(TaurusWidget):
 
@@ -56,7 +60,7 @@ class IORConfigPanel(TaurusWidget):
         self.userwidget = userwidget
         TaurusWidget.__init__(self, parent)
         self._setup_ui()
-        self.oldvalue =  {}                      
+        self.oldvalue =  {}
 
     def updateBoxes(self):
         self.userwidget.updateBoxes(True)
@@ -97,7 +101,7 @@ class IORUserPanel(TaurusWidget):
     def __init__(self, parent=None):
         TaurusWidget.__init__(self, parent)
         self._setup_ui()
-        self.ior_model = None        
+        self.ior_model = None
         self.mot_model = None
         self.options = []
         self.dict =  {}
@@ -121,13 +125,13 @@ class IORUserPanel(TaurusWidget):
         self.taurusForm2 = TaurusForm(self)
         self.taurusForm2.setWithButtons(False)
         self.gridLayout.addWidget(self.taurusForm2, 1, 0, 1, 2)
-       
+
         #form with a custom combo box - can replace the standard IOR widget
-        #self.comboBox = TaurusValueComboBox(self) 
+        #self.comboBox = TaurusValueComboBox(self)
         #self.comboBox.setAutoApply(True)
         #self.gridLayout.addWidget(self.comboBox, 2, 0, 1, 2)
 
-        #self.label = TaurusLabel(self) 
+        #self.label = TaurusLabel(self)
         #self.gridLayout.addWidget(self.label, 0, 1, 1, 1)
 
     def setModel(self, ior, mot, firstcall=False,updateIOR=False):
@@ -141,8 +145,8 @@ class IORUserPanel(TaurusWidget):
         updated = False
         if self.firstcall or self.updateIOR:
 
-            options = [(option.split(":")[0], option.split(":")[1]) 
-                       for option in (taurus.Attribute(ior+"/Labels").read().value).split()] 
+            options = [(option.split(":")[0], option.split(":")[1])
+                       for option in (taurus.Attribute(ior+"/Labels").read().value).split()]
 
             if options != self.options:
                 updated = True
@@ -173,12 +177,12 @@ class IORUserPanel(TaurusWidget):
                 #self.label.setModel(taurus.Attribute(ior+"/Value"))
                 #get taurus attribute which is value and also motor pos
                 self.position_ior = taurus.Attribute(ior+"/Value")
-                #self.position_mot = taurus.Attribute(mot+"/Position") 
+                #self.position_mot = taurus.Attribute(mot+"/Position")
 
             #see what index the combo box should have
             #index = self.comboBox.findData(self.position_ior.read().value)
             #self.comboBox.setCurrentIndex(index)
-            
+
 
     #def indexChanged(self,index):
         #value = self.dict[str(self.comboBox.currentText())]
@@ -229,6 +233,6 @@ def main():
         #app.setCursorFlashTime(0)
         w.show()
         sys.exit(app.exec_())
-        
+
 if __name__ == "__main__":
     main()
