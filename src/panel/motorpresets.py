@@ -79,9 +79,9 @@ class IORConfigPanel(TaurusWidget):
         self.taurusForm.setModel(attributes)
 
         #Need listeners on these attributes to update user widget
-        for a in attributes:
-            taurus.Attribute(a).addListener(self.configListener)
-        self.config_trigger.connect(self.updateBoxes)
+        #for a in attributes:
+        #    taurus.Attribute(a).addListener(self.configListener)
+        #self.config_trigger.connect(self.updateBoxes)
 
     def configListener(self, src, evt_type, attr_val):
 
@@ -156,12 +156,17 @@ class IORUserPanel(TaurusWidget):
                     #self.comboBox.setValueNames(self.options)
 
             #set the IOR widget
-            self.taurusForm.setCustomWidgetMap(getattr(TaurusCustomSettings,'T_FORM_CUSTOM_WIDGET_MAP',{}))
+            try:
+                self.taurusForm.setCustomWidgetMap(getattr(tauruscustomsettings,'T_FORM_CUSTOM_WIDGET_MAP',{}))
+            except NameError:
+                self.taurusForm.setCustomWidgetMap(getattr(TaurusCustomSettings,'T_FORM_CUSTOM_WIDGET_MAP',{}))
             self.taurusForm.setModel([self.ior_model])
 
-
             #set the motor widget
-            self.taurusForm2.setCustomWidgetMap(getattr(TaurusCustomSettings,'T_FORM_CUSTOM_WIDGET_MAP',{}))
+            try:
+                self.taurusForm2.setCustomWidgetMap(getattr(tauruscustomsettings,'T_FORM_CUSTOM_WIDGET_MAP',{}))
+            except NameError:
+                self.taurusForm2.setCustomWidgetMap(getattr(TaurusCustomSettings,'T_FORM_CUSTOM_WIDGET_MAP',{}))
             self.taurusForm2.setModel([self.mot_model])
 
             if self.firstcall:
