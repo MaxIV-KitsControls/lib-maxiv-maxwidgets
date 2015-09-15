@@ -3,6 +3,7 @@
 from __future__ import division
 
 from contextlib import contextmanager
+from math import log10
 
 import PyTango
 import PyQt4.Qt as Qt
@@ -86,6 +87,9 @@ class ValueBarWidget(QtGui.QWidget):
             return [self.min_value, 0, self.max_value]
         return [self.min_value, self.max_value]
 
+    def _format_tick(self, tick):
+        return "%.1f" % tick
+
     def paintEvent(self, e):
         qp = QtGui.QPainter()
         qp.begin(self)
@@ -100,7 +104,8 @@ class ValueBarWidget(QtGui.QWidget):
         for i, tick in enumerate(ticks):
             qp.drawLine(QtCore.QPointF(w, h - i*h/n + self.pad),
                         QtCore.QPointF(w+5, h - i*h/n + self.pad))
-            qp.drawText(w+self.pad, h - i*h/n + self.pad + fw/2, str(tick))
+            qp.drawText(w+self.pad, h - i*h/n + self.pad + fw/2,
+                        self._format_tick(tick))
 
     @contextmanager
     def _scale(self, qp):
@@ -121,7 +126,7 @@ class ValueBarWidget(QtGui.QWidget):
         qp.setFont(font)
 
         metrics = qp.fontMetrics()
-        fw = max(metrics.width(str(s)) for s in self._get_ticks())
+        fw = max(metrics.width(self._format_tick(t)) for t in self._get_ticks())
         fh = metrics.height()
         size = self.size()
         w = size.width() - (self.pad + fw)
@@ -183,13 +188,14 @@ class ValueBarWidget(QtGui.QWidget):
 def float_or_none(value):
     try:
         return float(value)
-    except ValueError:
+    except (ValueError, TypeError):
         return None
 
 
 class MAXValueBar(TaurusWidget):
 
-    value_trigger = QtCore.pyqtSignal(float, float)
+    value_trigger = QtCore.pyqtSignal(float)
+    w_value_trigger = QtCore.pyqtSignal(float)
     conf_trigger = QtCore.pyqtSignal()
 
     _delta = 1
@@ -197,8 +203,6 @@ class MAXValueBar(TaurusWidget):
     def __init__(self, parent=None, designMode=False):
         TaurusWidget.__init__(self, parent, designMode=designMode)
         self._setup_ui()
-
-        self._value = None
 
     @classmethod
     def getQtDesignerPluginInfo(cls):
@@ -215,26 +219,49 @@ class MAXValueBar(TaurusWidget):
         vbox.addWidget(self.valuebar)
         self.setLayout(vbox)
         self.value_trigger.connect(self.valuebar.setValue)
+        self.w_value_trigger.connect(self.valuebar.setWriteValue)
         self.conf_trigger.connect(self.updateConfig)
         self.setFocusPolicy(QtCore.Qt.WheelFocus)
+        self.conf = None
+
+    def _conf_listener(self, evt_src, evt_type, evt_value):
+        self.conf_trigger.emit()
 
     def setModel(self, model):
         TaurusWidget.setModel(self, model)
-        self.updateConfig()
-        conf = Configuration("%s?configuration" % self.model)
-        conf.addListener(lambda *args: self.conf_trigger.emit())
+        if model:
+            self.conf = Configuration("%s?configuration" % model)
+            self.conf.addListener(self._conf_listener)
+            self.updateConfig()
+        else:
+            self.conf and self.conf.removeListener(self._conf_listener)
 
     def _decimalDigits(self, fmt):
         '''returns the number of decimal digits from a format string
         (or None if they are not defined)'''
         try:
-            if fmt[-1].lower() in 'fg' and '.' in fmt:
+            if fmt[-1].lower() in 'fge' and '.' in fmt:
                 return int(fmt[:-1].split('.')[-1])
         except:
             return None
 
+    def _make_delta(self, fmt):
+        """Return a reasonable step size for the value, taking into
+        account the configured format and limits."""
+        digits = self._decimalDigits(fmt)
+        if digits is not None:
+            if fmt.endswith("e"):
+                # crude way of getting a scale for a value
+                # in scientific notation
+                limit = max([abs(float(x))
+                             for x in self.conf.getLimits()])
+                exponent = int(log10(limit))
+            else:
+                exponent = 1  # or 0?
+            return pow(10, -digits + exponent)
+
     def updateConfig(self):
-        conf = Configuration("%s?configuration" % self.model)
+        conf = self.conf
         # Note: could be inefficient with lots of redraws?
         self.valuebar.setMaximum(float_or_none(conf.max_value))
         self.valuebar.setMinimum(float_or_none(conf.min_value))
@@ -243,16 +270,15 @@ class MAXValueBar(TaurusWidget):
         self.valuebar.setAlarmHigh(float_or_none(conf.max_alarm))
         self.valuebar.setAlarmLow(float_or_none(conf.min_alarm))
 
-        digits = self._decimalDigits(conf.format)
-        if digits:
-            self._delta = pow(10, -digits)
+        self._delta = self._make_delta(conf.format)
 
     def handleEvent(self, evt_src, evt_type, evt_value):
         if evt_type in (PyTango.EventType.PERIODIC_EVENT,
                         PyTango.EventType.CHANGE_EVENT):
-            if (evt_value.value is not None and
-                    evt_value.w_value is not None):
-                self.value_trigger.emit(evt_value.value, evt_value.w_value)
+            if (evt_value.value):
+                self.value_trigger.emit(evt_value.value)
+            if (evt_value.w_value):
+                self.value_trigger.emit(evt_value.w_value)
 
     def wheelEvent(self, evt):
         # if not self.getEnableWheelEvent() or Qt.QLineEdit.isReadOnly(self):
