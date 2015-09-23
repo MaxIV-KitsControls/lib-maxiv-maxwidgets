@@ -1,4 +1,8 @@
-from taurus.qt.qtgui.panel import TaurusForm
+
+from taurus.qt.qtgui.input import TaurusValueLineEdit
+from taurus.qt.qtgui.panel import TaurusForm, TaurusValue
+
+from maxwidgets.input.maxlineedit import MAXLineEdit
 
 
 class MAXForm(TaurusForm):
@@ -10,13 +14,41 @@ class MAXForm(TaurusForm):
 
     widgetMap = {'GammaSPCe': ('maxwidgets.panel.GammaSPCeTV', (), {})}
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, defaultFormWidget=TaurusValue, *args, **kwargs):
+
         if 'withButtons' not in kwargs:
             kwargs['withButtons'] = False
 
         TaurusForm.__init__(self, *args, **kwargs)
+        self._defaultFormWidget = defaultFormWidget
         self.setModifiableByUser(True)
         self.setCustomWidgetMap(self.widgetMap)
+        self._useResetButton = True
+
+    def setModel(self, model):
+        TaurusForm.setModel(self, model)
+
+        # a hack to replace taurus lineedit widgets with ours...
+        for widget in self:
+            if isinstance(widget.writeWidget(), TaurusValueLineEdit):
+                widget.writeWidgetClass = MAXLineEdit
+                # widget.writeWidget().setAutoApply(True)  # this causes issues
+                widget.writeWidget().setForcedApply(True)
+                widget.writeWidget().setEnableWheelEvent(True)
+
+    def setFontSize(self, size):
+        self.setStyleSheet('QLabel,QLineEdit {font-size: %dpt;}' % size)
+
+        # for widget in self:
+        #     print "setFontSize", size, widget
+        #     if widget.writeWidget():
+        #         font = widget.writeWidget().font()
+        #         font.setPointSize(size)
+        #         widget.writeWidget().setFont(font)
+
+        #     if widget.readWidget():
+        #         widget.readWidget()\
+        #.setStyleSheet('QLabel {font-size: %dpt;}' % size)
 
 
 def main():
@@ -39,6 +71,7 @@ def main():
     form.show()
 
     sys.exit(app.exec_())
+
 
 if __name__ == '__main__':
     main()
