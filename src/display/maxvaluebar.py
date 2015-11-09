@@ -40,11 +40,9 @@ class ValueBarWidget(QtGui.QWidget):
 
         self.pad = 10
 
-    def setValue(self, value, write_value=None):
+    def setValue(self, value):
         if value != self.value:
             self.value = value
-            if write_value != self.write_value:
-                self.write_value = write_value
             self.repaint()
 
     def setWriteValue(self, value):
@@ -263,6 +261,7 @@ class MAXValueBar(TaurusWidget):
     def updateConfig(self):
         conf = self.conf
         # Note: could be inefficient with lots of redraws?
+        self.valuebar.tick_format = conf.format
         self.valuebar.setMaximum(float_or_none(conf.max_value))
         self.valuebar.setMinimum(float_or_none(conf.min_value))
         self.valuebar.setWarningHigh(float_or_none(conf.max_warning))
@@ -275,10 +274,10 @@ class MAXValueBar(TaurusWidget):
     def handleEvent(self, evt_src, evt_type, evt_value):
         if evt_type in (PyTango.EventType.PERIODIC_EVENT,
                         PyTango.EventType.CHANGE_EVENT):
-            if (evt_value.value):
+            if (evt_value.value is not None):
                 self.value_trigger.emit(evt_value.value)
-            if (evt_value.w_value):
-                self.value_trigger.emit(evt_value.w_value)
+            if (evt_value.w_value is not None):
+                self.w_value_trigger.emit(evt_value.w_value)
 
     def wheelEvent(self, evt):
         # if not self.getEnableWheelEvent() or Qt.QLineEdit.isReadOnly(self):
