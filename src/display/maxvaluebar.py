@@ -5,11 +5,15 @@ from __future__ import division
 from contextlib import contextmanager
 from math import log10
 
-import PyTango
 import PyQt4.Qt as Qt
-from PyQt4 import QtGui, QtCore
-from taurus.qt.qtgui.panel import TaurusWidget
+from PyQt4 import QtCore, QtGui
+
+import PyTango
 from taurus import Configuration
+from taurus.core.taurusoperation import WriteAttrOperation
+from taurus.qt.qtgui.base import TaurusBaseWritableWidget
+from taurus.qt.qtgui.panel import TaurusWidget
+
 
 __all__ = ["MAXValueBar"]
 
@@ -190,17 +194,30 @@ def float_or_none(value):
         return None
 
 
-class MAXValueBar(TaurusWidget):
+class MAXValueBar(QtGui.QWidget, TaurusBaseWritableWidget):
 
     value_trigger = QtCore.pyqtSignal(float)
     w_value_trigger = QtCore.pyqtSignal(float)
     conf_trigger = QtCore.pyqtSignal()
 
+    _wheel_delta = 1
     _delta = 1
 
     def __init__(self, parent=None, designMode=False):
-        TaurusWidget.__init__(self, parent, designMode=designMode)
+        #super(MAXValueBar, self).__init__(parent)
+        QtGui.QWidget.__init__(self, parent)
+        TaurusBaseWritableWidget.__init__(self, "fisk", taurus_parent=parent, designMode=designMode)
+        self._enableWheelEvent = True
+
+        self.w_value = None
         self._setup_ui()
+
+        # self._localModelName = None
+
+        self._throttle_timer = QtCore.QTimer()
+        self._throttle_timer.setInterval(200)
+        self._throttle_timer.setSingleShot(True)
+        self.connect(self._throttle_timer, QtCore.SIGNAL("timeout()"), self._writeValue)
 
     @classmethod
     def getQtDesignerPluginInfo(cls):
@@ -225,21 +242,15 @@ class MAXValueBar(TaurusWidget):
     def _conf_listener(self, evt_src, evt_type, evt_value):
         self.conf_trigger.emit()
 
-    def setModel(self, model):
-        TaurusWidget.setModel(self, model)
-        if model:
-            self.conf = Configuration("%s?configuration" % model)
-            self.conf.addListener(self._conf_listener)
-            self.updateConfig()
-        else:
-            self.conf and self.conf.removeListener(self._conf_listener)
-
     def _decimalDigits(self, fmt):
         '''returns the number of decimal digits from a format string
         (or None if they are not defined)'''
+        # TODO: handle "%e" format too
         try:
-            if fmt[-1].lower() in 'fge' and '.' in fmt:
+            if fmt[-1].lower() in 'fg' and '.' in fmt:
                 return int(fmt[:-1].split('.')[-1])
+            else:
+                return 1
         except:
             return None
 
@@ -259,49 +270,89 @@ class MAXValueBar(TaurusWidget):
             return pow(10, -digits + exponent)
 
     def updateConfig(self):
-        conf = self.conf
+        conf = self._conf
         # Note: could be inefficient with lots of redraws?
         self.valuebar.tick_format = conf.format
         self.valuebar.setMaximum(float_or_none(conf.max_value))
         self.valuebar.setMinimum(float_or_none(conf.min_value))
-        self.valuebar.setWarningHigh(float_or_none(conf.max_warning))
-        self.valuebar.setWarningLow(float_or_none(conf.min_warning))
-        self.valuebar.setAlarmHigh(float_or_none(conf.max_alarm))
-        self.valuebar.setAlarmLow(float_or_none(conf.min_alarm))
+        self.valuebar.setWarningHigh(float_or_none(conf.alarms.max_warning))
+        self.valuebar.setWarningLow(float_or_none(conf.alarms.min_warning))
+        self.valuebar.setAlarmHigh(float_or_none(conf.alarms.max_alarm))
+        self.valuebar.setAlarmLow(float_or_none(conf.alarms.min_alarm))
 
-        self._delta = self._make_delta(conf.format)
+        # update the wheel delta to correspond to the LSD
+        digits = self._decimalDigits(conf.format)
+        if digits is not None:
+            self._wheel_delta = pow(10, -digits)
 
     def handleEvent(self, evt_src, evt_type, evt_value):
         if evt_type in (PyTango.EventType.PERIODIC_EVENT,
                         PyTango.EventType.CHANGE_EVENT):
+                        # taurus.core.taurusbasetypes.TaurusEventType.Periodic,
+                        # taurus.core.taurusbasetypes.TaurusEventType.Change):
+
             if (evt_value.value is not None):
                 self.value_trigger.emit(evt_value.value)
             if (evt_value.w_value is not None):
                 self.w_value_trigger.emit(evt_value.w_value)
 
+        elif evt_type in (PyTango.EventType.ATTR_CONF_EVENT,
+                          PyTango.EventType.QUALITY_EVENT):
+
+            self._conf = evt_value
+            self.conf_trigger.emit()
+
+    def setValue(self, v):
+        self.valuebar.setWriteValue(v)
+
+    def getValue(self):
+        return self.valuebar.write_value
+
+    @QtCore.pyqtSlot()
+    def _writeValue(self, forceApply=True):
+        operation = WriteAttrOperation(self.getModelObj(), self.getValue(),
+                                       self.getOperationCallbacks())
+        operation.setDangerMessage("")
+        self._operations = [operation]
+        self.writeValue()
+
+    def setEnableWheelEvent(self, b):
+        self._enableWheelEvent = b
+
+    def getEnableWheelEvent(self):
+        return self._enableWheelEvent
+
+    def resetEnableWheelEvent(self):
+        self.setEnableWheelEvent(False)
+
+    def throttledWrite(self, delta):
+        """Intead of writing to Tango every time the value changes, we start a
+        timer. Writes during the timer will be accumulated and when the timer
+        runs out, the last value is written.
+        """
+        self.setValue(self.getValue() + delta)
+        if not self._throttle_timer.isActive():
+            self._throttle_timer.start()
+
     def wheelEvent(self, evt):
-        # if not self.getEnableWheelEvent() or Qt.QLineEdit.isReadOnly(self):
-        #     return Qt.QLineEdit.wheelEvent(self, evt)
+        if not self.getEnableWheelEvent():
+            return QtGui.QWheelEvent(self, evt)
         model = self.getModelObj()
         if model is None or not model.isNumeric():
-            return Qt.QLineEdit.wheelEvent(self, evt)
+            return QtGui.QWheelEvent(self, evt)
 
         evt.accept()
-        numDegrees = evt.delta() / 8
-        numSteps = numDegrees / 15
+        degrees = evt.delta() / 8
+        steps = degrees / 15
         modifiers = evt.modifiers()
         if modifiers & Qt.Qt.ControlModifier:
-            numSteps *= 10
+            steps *= 10
         elif (modifiers & Qt.Qt.AltModifier) and model.isFloat():
-            numSteps *= .1
+            steps *= .1
 
         # change the value by 1 in the least significant digit according
         # to the configured format.
-        value = max(self.valuebar.min_value,
-                    min(self.valuebar.max_value,
-                        self.valuebar.write_value + numSteps*self._delta))
-        model.write(value)
-        self.valuebar.setWriteValue(value)
+        self.throttledWrite(steps*self._wheel_delta)
 
 
 def main():
