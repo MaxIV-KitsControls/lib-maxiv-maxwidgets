@@ -103,10 +103,15 @@ class ValueBarWidget(QtGui.QWidget):
         n = len(ticks) - 1
         qp.setPen(QtGui.QColor(0, 0, 0))
         qp.drawLine(w, self.pad, w, h+self.pad)
+        maxtick = max(ticks)
+        mintick = min(ticks)
+        height = maxtick - mintick
+        scale = h / height
         for i, tick in enumerate(ticks):
-            qp.drawLine(QtCore.QPointF(w, h - i*h/n + self.pad),
-                        QtCore.QPointF(w+5, h - i*h/n + self.pad))
-            qp.drawText(w+self.pad, h - i*h/n + self.pad + fw/2,
+            vpos = h - (tick-mintick)*scale
+            qp.drawLine(QtCore.QPointF(w, vpos + self.pad),
+                        QtCore.QPointF(w+5, vpos + self.pad))
+            qp.drawText(w+self.pad, vpos + self.pad + fw/2,
                         self._format_tick(tick))
 
     @contextmanager
@@ -204,7 +209,6 @@ class MAXValueBar(QtGui.QWidget, TaurusBaseWritableWidget):
     _delta = 1
 
     def __init__(self, parent=None, designMode=False):
-        #super(MAXValueBar, self).__init__(parent)
         QtGui.QWidget.__init__(self, parent)
         TaurusBaseWritableWidget.__init__(self, "fisk", taurus_parent=parent, designMode=designMode)
         self._enableWheelEvent = True
@@ -269,8 +273,7 @@ class MAXValueBar(QtGui.QWidget, TaurusBaseWritableWidget):
                 exponent = 1  # or 0?
             return pow(10, -digits + exponent)
 
-    def updateConfig(self):
-        conf = self._conf
+    def updateConfig(self, conf):
         # Note: could be inefficient with lots of redraws?
         self.valuebar.tick_format = conf.format
         self.valuebar.setMaximum(float_or_none(conf.max_value))
@@ -290,17 +293,14 @@ class MAXValueBar(QtGui.QWidget, TaurusBaseWritableWidget):
                         PyTango.EventType.CHANGE_EVENT):
                         # taurus.core.taurusbasetypes.TaurusEventType.Periodic,
                         # taurus.core.taurusbasetypes.TaurusEventType.Change):
-
-            if (evt_value.value is not None):
-                self.value_trigger.emit(evt_value.value)
-            if (evt_value.w_value is not None):
-                self.w_value_trigger.emit(evt_value.w_value)
+            if evt_value.value is not None:
+                self.valuebar.setValue(evt_value.value)
+            if (evt_value.w_value is not None) and not self._throttle_timer.isActive():
+                self.setValue(evt_value.w_value)
 
         elif evt_type in (PyTango.EventType.ATTR_CONF_EVENT,
                           PyTango.EventType.QUALITY_EVENT):
-
-            self._conf = evt_value
-            self.conf_trigger.emit()
+            self.updateConfig(evt_value)
 
     def setValue(self, v):
         self.valuebar.setWriteValue(v)
@@ -336,10 +336,10 @@ class MAXValueBar(QtGui.QWidget, TaurusBaseWritableWidget):
 
     def wheelEvent(self, evt):
         if not self.getEnableWheelEvent():
-            return QtGui.QWheelEvent(self, evt)
+            return QtGui.QWidget.QWheelEvent(self, evt)
         model = self.getModelObj()
         if model is None or not model.isNumeric():
-            return QtGui.QWheelEvent(self, evt)
+            return QtGui.QWidget.QWheelEvent(self, evt)
 
         evt.accept()
         degrees = evt.delta() / 8
