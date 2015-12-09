@@ -1,7 +1,9 @@
 from taurus.external.qt import Qt, QtGui
 from taurus.qt.qtgui.base import TaurusBaseWritableWidget
 from taurus.core.taurusoperation import WriteAttrOperation
+from taurus.core.taurusbasetypes import TaurusEventType
 import numpy as np
+import PyTango
 
 class MAXQArrayLineEdit(QtGui.QWidget):
     """
@@ -64,7 +66,7 @@ class MAXQArrayLineEdit(QtGui.QWidget):
         """
         if astype is None:
             astype = float
-        return np.array([le.text() for le in self._qlineedits]).astype(astype)
+        return np.array([str(le.text()) for le in self._qlineedits]).astype(astype)
 
     def setArray(self, arr):
         """
@@ -78,6 +80,14 @@ class MAXQArrayLineEdit(QtGui.QWidget):
             self._addLineEdit()
         for val, lineedit in zip(arr, self._qlineedits):
             lineedit.setText(str(val))
+
+    def setValidator(self, Qvalidator):
+        """
+        Set int or double validator to make sure user cannot write other letters
+        """
+        for le in self._qlineedits:
+            le.setValidator(Qvalidator)
+
 
 class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
     """Similar to TaurusValueLineEdit but displays one lineedit for each
@@ -105,7 +115,7 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
             write_value = self.getModelObj().getValueObj().w_value
             if len(read_value) != len(write_value):
                 self.setArray(read_value)
-        except AttributeError:
+        except (AttributeError, TypeError):
             return
 
     def setValue(self, v):
@@ -118,11 +128,12 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
         """
         Get the value from the widget
         """
-        arr = self.array()
-        try:
-            return arr
-        except:
-            return None
+        # Todo getting the type like this might be ugly, also doesn't seem to work for sys/tg_test/1/long_spectrum
+        # Crashes the tangotest device. Why could this be?
+        attr_type = self.getModelObj().getValueObj().value.dtype
+        arr = self.array(astype=attr_type)
+        return arr
+
 
     def updatePendingOperations(self):
         """
@@ -158,13 +169,34 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
         if self._autoApply:
             self.writeValue()
 
+    def handleEvent(self, evt_src, evt_type, evt_value):
+        """
+        Adding the validator from here
+        """
+        if evt_type == TaurusEventType.Config:
+            self._updateValidator(evt_value)
+        TaurusBaseWritableWidget.handleEvent(self, evt_src, evt_type, evt_value)
+
+    def _updateValidator(self, attrinfo):
+        '''This method sets a validator depending on the data type
+        attrinfo is an AttributeInfoEx object'''
+        if PyTango.is_int_type(attrinfo.data_type):
+            validator = Qt.QIntValidator(self) #initial range is -2147483648 to 2147483647 (and cannot be set larger)
+            self.setValidator(validator)
+        elif PyTango.is_float_type(attrinfo.data_type):
+            validator= Qt.QDoubleValidator(self)
+            self.setValidator(validator)
+        else:
+            self.setValidator(None)
+
+
 
 if __name__ == "__main__":
     import sys
     if len(sys.argv) > 1:
         attr_name = sys.argv[1]
     else:
-        attr_name = "sys/tg_test/1/double_spectru"
+        attr_name = "sys/tg_test/1/float_spectrum"
     a = Qt.QApplication([])
     panel = Qt.QWidget()
     l = Qt.QGridLayout()
