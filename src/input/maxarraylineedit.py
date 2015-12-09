@@ -70,6 +70,8 @@ class MAXQArrayLineEdit(QtGui.QWidget):
         """
         Set the array displayed to be
         """
+        if not isinstance(arr, np.ndarray):
+            return
         while len(self._qlineedits) > len(arr):
             self._removeLineEdit()
         while len(arr) > len(self._qlineedits):
@@ -98,10 +100,13 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
         """
         # TODO I'm not happy with this solution and would love another!
         TaurusBaseWritableWidget.setModel(self, model)
-        read_value  = self.getModelObj().getValueObj().value
-        write_value = self.getModelObj().getValueObj().w_value
-        if len(read_value) != len(write_value):
-            self.setArray(read_value)
+        try:
+            read_value  = self.getModelObj().getValueObj().value
+            write_value = self.getModelObj().getValueObj().w_value
+            if len(read_value) != len(write_value):
+                self.setArray(read_value)
+        except AttributeError:
+            return
 
     def setValue(self, v):
         """
@@ -159,7 +164,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         attr_name = sys.argv[1]
     else:
-        attr_name = "sys/tg_test/1/double_spectrum"
+        attr_name = "sys/tg_test/1/double_spectru"
     a = Qt.QApplication([])
     panel = Qt.QWidget()
     l = Qt.QGridLayout()
