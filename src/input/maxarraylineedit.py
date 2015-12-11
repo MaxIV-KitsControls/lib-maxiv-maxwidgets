@@ -19,6 +19,8 @@ class MAXQArrayLineEdit(QtGui.QWidget):
         self.setLayout(QtGui.QHBoxLayout())
         self.layout().setMargin(0)
         self.layout().setSpacing(0)
+        self.emptyLabel = QtGui.QLabel("")
+        self.layout().addWidget(self.emptyLabel)
         self._qlineedits = []
 
     def _addLineEdit(self):
@@ -70,8 +72,15 @@ class MAXQArrayLineEdit(QtGui.QWidget):
 
     def setArray(self, arr):
         """
-        Set the array displayed to be
+        Set the array to be displayed. If no array display "---"
         """
+        if arr is None:
+            self.emptyLabel.setText("---")
+            return
+        if len(arr) > 0:
+            self.emptyLabel.setText("")
+        else:
+            self.emptyLabel.setText("---")
         if not isinstance(arr, np.ndarray):
             return
         while len(self._qlineedits) > len(arr):
@@ -102,14 +111,11 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
         self.editingFinished.connect(self._onEditingFinished)
         self.connect(self, Qt.SIGNAL('valueChanged'), self.updatePendingOperations)
 
-    def setModel(self,model):
+    def _fixnumberofelements(self):
         """
-        If the read value has more elements than the write value, we suspect that this is due
-         to the device being started with wrong length on the write value. So at start we populate
-         with the read value.
+        When first starting or when the device comes alive, we might need to fix the number of elements displayed.
+        If the write value has less elements than the readvalue display the readvalue instead.
         """
-        # TODO I'm not happy with this solution and would love another!
-        TaurusBaseWritableWidget.setModel(self, model)
         try:
             read_value  = self.getModelObj().getValueObj().value
             write_value = self.getModelObj().getValueObj().w_value
@@ -117,6 +123,15 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
                 self.setArray(read_value)
         except (AttributeError, TypeError):
             return
+
+
+    def setModel(self,model):
+        """
+        Set model and fix number of elements displayed.
+        """
+        TaurusBaseWritableWidget.setModel(self, model)
+        self._fixnumberofelements()
+
 
     def setValue(self, v):
         """
@@ -126,10 +141,8 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
 
     def getValue(self):
         """
-        Get the value from the widget
+        Get the value from the widget, with the same dtype as the read value
         """
-        # Todo getting the type like this might be ugly, also doesn't seem to work for sys/tg_test/1/long_spectrum
-        # Crashes the tangotest device. Why could this be?
         attr_type = self.getModelObj().getValueObj().value.dtype
         arr = self.array(astype=attr_type)
         return arr
@@ -171,9 +184,10 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
 
     def handleEvent(self, evt_src, evt_type, evt_value):
         """
-        Adding the validator from here
+        Adding the validator from here, also if config event, fix the number of elements displayed
         """
         if evt_type == TaurusEventType.Config:
+            self._fixnumberofelements()
             self._updateValidator(evt_value)
         TaurusBaseWritableWidget.handleEvent(self, evt_src, evt_type, evt_value)
 
@@ -188,7 +202,6 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
             self.setValidator(validator)
         else:
             self.setValidator(None)
-
 
 
 if __name__ == "__main__":
