@@ -44,10 +44,12 @@ class TaurusCommandButtonPanel(TaurusWidget):
         self._buttons = []
         self.setLayout(Qt.QGridLayout())
 
-        self.frame = TaurusWidget()
+        self.frame = TaurusWidget(self)
+        self.frame.setUseParentModel(True)
         self.frame.setLayout(Qt.QGridLayout())
 
         self.scrollArea = TaurusScrollArea(self)
+        self.scrollArea.setUseParentModel(True)
         self.scrollArea.setWidget(self.frame)
         self.scrollArea.setWidgetResizable(True)
         self.layout().addWidget(self.scrollArea)
@@ -90,9 +92,12 @@ class TaurusCommandButtonPanel(TaurusWidget):
         Create taurus commandbuttons for everything in modelcommand
         """
         for modelcommand in self._modelcommands:
-            button = TaurusCommandButton()
-            button.setModel(modelcommand['model'])
+            button = TaurusCommandButton(self.frame)
             button.setCommand(modelcommand['command'])
+            if 'model' in modelcommand:
+                button.setModel(modelcommand['model'])
+            else:
+                button.setUseParentModel(True)
             if 'customtext' in modelcommand:
                 button.setCustomText(modelcommand['customtext'])
             if 'dangermessage' in modelcommand:
@@ -128,7 +133,7 @@ class TaurusCommandButtonPanel(TaurusWidget):
                                               'Dict contents:<br>' +
                                               'model, command <br>' +
                                               'Optional dict keys: ' +
-                                              'customtext, dangermessage' +
+                                              'customtext, dangermessage, ' +
                                               'parameters, timeout',
                                               QtGui.QLineEdit.Normal,
                                               cmdstr)
