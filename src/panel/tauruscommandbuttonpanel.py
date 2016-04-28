@@ -36,6 +36,9 @@ class TaurusCommandButtonPanel(TaurusWidget):
         dangermessage: Danger message that popups before executing the command
         parameters:
         timeout:
+    If model is not set the button will use parentmodel i.e.
+    If all commands in the panel are connected to the same device one could
+    setModel on the panel instead.
     """
 
     def __init__(self, parent=None, designmode=False):
