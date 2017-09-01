@@ -1,6 +1,7 @@
 import PyTango
 from PyQt4 import QtCore, QtGui, Qt
-from taurus.qt.qtgui.panel import TaurusWidget, TaurusForm
+from taurus.qt.qtgui.container import TaurusWidget
+from taurus.qt.qtgui.panel import TaurusForm
 from taurus.qt.qtgui.input import TaurusValueComboBox
 from taurus.qt.qtgui.display import TaurusLabel
 

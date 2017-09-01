@@ -3,7 +3,7 @@ from taurus.qt.qtgui.input import TaurusValueLineEdit
 from taurus.qt.qtgui.panel import TaurusForm, TaurusValue
 
 from maxwidgets.input.maxlineedit import MAXLineEdit
-
+from maxwidgets.extra_pool.maxpoolmotor import MaxPoolMotorTV
 
 class MAXForm(TaurusForm):
     """
@@ -12,7 +12,11 @@ class MAXForm(TaurusForm):
     custom TaurusValue widgets for som commonly used device classes.
     """
 
-    widgetMap = {'GammaSPCe': ('maxwidgets.panel.GammaSPCeTV', (), {})}
+    widgetMap = {'GammaSPCe': ('maxwidgets.panel.GammaSPCeTV', (), {}),
+                 'Motor': (MaxPoolMotorTV),
+                 'SimuMotor': (MaxPoolMotorTV),
+                 'PseudoMotor': (MaxPoolMotorTV),
+            }
 
     def __init__(self, defaultFormWidget=TaurusValue, *args, **kwargs):
 

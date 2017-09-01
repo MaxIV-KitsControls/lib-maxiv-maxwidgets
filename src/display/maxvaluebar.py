@@ -12,7 +12,7 @@ import PyTango
 from taurus import Configuration
 from taurus.core.taurusoperation import WriteAttrOperation
 from taurus.qt.qtgui.base import TaurusBaseWritableWidget
-from taurus.qt.qtgui.panel import TaurusWidget
+from taurus.qt.qtgui.container import TaurusWidget
 
 
 __all__ = ["MAXValueBar"]
