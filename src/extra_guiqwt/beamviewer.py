@@ -3,7 +3,7 @@ import taurus
 from guiqwt.plot import ImageWindow
 from guiqwt.styles import ImageParam
 
-from taurus.qt import Qt
+from taurus.external.qt import Qt
 from taurus.qt.qtgui.base import TaurusBaseWidget
 from taurus.qt.qtgui.extra_guiqwt.image import TaurusEncodedImageItem
 from taurus.qt.qtgui.dialog import TaurusMessageBox

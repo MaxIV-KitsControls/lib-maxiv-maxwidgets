@@ -1,6 +1,6 @@
 from guiqwt.tools import CommandTool, DefaultToolbarID
 
-from taurus.qt import Qt
+from taurus.external.qt import Qt
 from taurus.qt.qtgui.resource import getIcon
 
 #from ui.ui_CameraSettingsDialog import Ui_CameraSettingsDialog
