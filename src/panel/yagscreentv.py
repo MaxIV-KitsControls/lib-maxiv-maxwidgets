@@ -1,6 +1,9 @@
 import sys
 import PyTango
-from taurus.qt import Qt, QtGui
+try:
+    from taurus.qt import Qt, QtGui
+except ImportError:
+    from taurus.external.qt import Qt, QtGui
 from taurus.qt.qtgui.container import TaurusWidget
 from taurus.qt.qtgui.button import TaurusCommandButton
 from taurus.qt.qtgui.panel import TaurusDevicePanel
