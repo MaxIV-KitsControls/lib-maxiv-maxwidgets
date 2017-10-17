@@ -1,17 +1,23 @@
 #!/usr/bin/env python
 
-from taurus.qt.qtgui.container import TaurusWidget
+"""MaxIV Pool Motor Module."""
+
+try:
+    from taurus.qt.qtgui.panel import TaurusWidget
+except ImportError:
+    from taurus.qt.qtgui.container import TaurusWidget
 from sardana.taurus.qt.qtgui.extra_pool import PoolMotorTV
+
 
 class MaxPoolMotorTV(PoolMotorTV):
     """MaxIV implementation of PoolMotorTV removing polling."""
 
     def __init__(self, parent=None, designMode=False):
+        """Class initialization method."""
         PoolMotorTV.__init__(self)
 
     def showEvent(self, event):
         """Overwrite the showEvent method from PoolMotorSlim."""
-
         TaurusWidget.showEvent(self, event)
         try:
             self.motor_dev.getAttribute('Position').enablePolling(force=False)
@@ -20,6 +26,7 @@ class MaxPoolMotorTV(PoolMotorTV):
 
 
 def main():
+    """Main function to launch the widget."""
     import sys
     from taurus.core.util import argparse
     from taurus.qt.qtgui.application import TaurusApplication
@@ -38,7 +45,7 @@ def main():
     widgetMap = {'Motor': (MaxPoolMotorTV),
                  'SimuMotor': (MaxPoolMotorTV),
                  'PseudoMotor': (MaxPoolMotorTV)
-        }
+                 }
     form = TaurusForm()
     form.setCustomWidgetMap(widgetMap)
     form.setModel(args)
@@ -49,4 +56,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
