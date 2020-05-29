@@ -61,9 +61,7 @@ class TaurusCommandButtonPanel(TaurusWidget):
         self.setContextMenuPolicy(Qt.Qt.ActionsContextMenu)
         self.chooseCommandsAction = Qt.QAction('Modify commands', self)
         self.addAction(self.chooseCommandsAction)
-        self.connect(self.chooseCommandsAction,
-                     Qt.SIGNAL("triggered()"),
-                     self.chooseCommands)
+        self.chooseCommandsAction.triggered.connect(self.chooseCommands)
 
         self.setModifiableByUser(True)
 
@@ -109,9 +107,7 @@ class TaurusCommandButtonPanel(TaurusWidget):
                 button.setParameters(modelcommand['parameters'])
             if 'timeout' in modelcommand:
                 button.setTimeout(modelcommand['timeout'])
-            self.connect(button,
-                         Qt.SIGNAL('commandExecuted'),
-                         self.onCommandExectued)
+            button.commandExecuted.connect(self.onCommandExectued)
             # Make button expand vertically
             button.setSizePolicy(QtGui.QSizePolicy.Minimum,
                                  QtGui.QSizePolicy.Expanding)
