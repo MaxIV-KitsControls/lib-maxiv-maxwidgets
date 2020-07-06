@@ -19,7 +19,11 @@ EXTRA_TAURUS_PATHS="{0}"
 
 for path in $EXTRA_TAURUS_PATHS; do
     if ! echo $TAURUSQTDESIGNERPATH | grep -q $path; then
-        TAURUSQTDESIGNERPATH=$path:$TAURUSQTDESIGNERPATH
+        if [ -z ${{TAURUSQTDESIGNERPATH}} ]; then
+           TAURUSQTDESIGNERPATH=$path
+        else
+           TAURUSQTDESIGNERPATH=$TAURUSQTDESIGNERPATH:$path
+        fi
     fi
 done
 
