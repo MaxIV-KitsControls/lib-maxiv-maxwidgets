@@ -157,7 +157,7 @@ class TaurusCommandButtonPanel(TaurusWidget):
         Slot called when the command is executed
         """
         if result is None:
-            print "Command executed and returned None"
+            print("Command executed and returned None")
             return
         cmdbutton = self.sender()
         output = ('<b>Command:</b> ' + cmdbutton.getCommand() + '<br>' +

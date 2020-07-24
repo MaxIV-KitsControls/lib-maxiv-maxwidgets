@@ -38,8 +38,8 @@ class CameraSettingsDialog(Qt.QDialog):
         self.ui.triggerModeComboBox.setAutoApply(True)
         self.ui.triggerModeComboBox.setModel('/TriggerMode')
 
-        self.ui.imageTypeComboBox.setValueNames(IMAGE_TYPES.items())
-        self.ui.triggerModeComboBox.setValueNames(TRIGGER_MODES.items())
+        self.ui.imageTypeComboBox.setValueNames(list(IMAGE_TYPES.items()))
+        self.ui.triggerModeComboBox.setValueNames(list(TRIGGER_MODES.items()))
 
     def setModel(self, model):
         self.ui.taurusWidget.setModel(model)

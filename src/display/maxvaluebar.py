@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import division
+
 
 from contextlib import contextmanager
 from math import log10
