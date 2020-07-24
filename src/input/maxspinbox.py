@@ -1,6 +1,7 @@
 from taurus.qt.qtgui.input import TaurusValueSpinBox
 from maxwidgets.input import MAXLineEdit
 
+
 class MAXSpinBox(TaurusValueSpinBox):
     
     def __init__(self, parent = None, designMode = False):
@@ -16,4 +17,3 @@ class MAXSpinBox(TaurusValueSpinBox):
         ret['group']  = 'MAX-lab Taurus Widgets'
         ret['module'] = 'maxwidgets.input'
         return ret
-

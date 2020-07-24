@@ -7,7 +7,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -71,9 +71,6 @@ class Ui_CameraSettingsDialog(object):
         self.label_5.setText(_translate("CameraSettingsDialog", "Exposure (ms)", None))
         self.label_6.setText(_translate("CameraSettingsDialog", "Gain (dB)", None))
 
-try:
-    from taurus.qt.qtgui.panel import TaurusWidget
-except ImportError:
-    from taurus.qt.qtgui.container import TaurusWidget
+from taurus.qt.qtgui.container import TaurusWidget
 from taurus.qt.qtgui.input import TaurusValueComboBox
 from maxwidgets.input import MAXLineEdit

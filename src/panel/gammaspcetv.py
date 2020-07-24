@@ -1,18 +1,15 @@
-import PyTango
 import sys
-try:
-    from taurus.qt import Qt, QtGui
-except ImportError:
-    from taurus.external.qt import Qt, QtGui
+from functools import partial
+
+from tango import DevFailed
+from taurus.external.qt import Qt, QtGui
 from taurus.qt.qtgui.container import TaurusWidget
+from taurus.qt.qtgui.dialog import TaurusMessageBox
 from taurus.qt.qtgui.display import TaurusLed
 from taurus.qt.qtgui.input import TaurusValueLineEdit
 from taurus.qt.qtgui.panel import TaurusDevicePanel
-from taurus.qt.qtgui.panel.taurusvalue import \
-    TaurusValue, ExpandingLabel, DefaultLabelWidget, DefaultUnitsWidget
-
-from taurus.qt.qtgui.dialog import TaurusMessageBox
-from functools import partial
+from taurus.qt.qtgui.panel.taurusvalue import (DefaultLabelWidget, DefaultUnitsWidget,
+                                               ExpandingLabel, TaurusValue)
 
 
 class GammaSPCeTVLabelWidget(DefaultLabelWidget):
@@ -146,7 +143,7 @@ class GammaSPCeTV(TaurusValue):
             try:
                 state = obj.getAttribute('State').read().value
                 status = obj.getAttribute('Status').read().value
-            except PyTango.DevFailed:
+            except DevFailed:
                 return
             tool_tip.append(('state', state))
             # hack for displaying multi-line status messages
@@ -238,6 +235,7 @@ def main():
     form.show()
 
     sys.exit(app.exec_())
+
 
 if __name__ == '__main__':
     main()

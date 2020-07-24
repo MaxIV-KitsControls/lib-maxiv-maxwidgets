@@ -1,15 +1,13 @@
 from taurus.external.qt import Qt, QtCore, QtGui
 from taurus.qt.qtgui.input import TaurusValueLineEdit
-try:
-    from taurus.qt.qtgui.panel import TaurusWidget
-except ImportError:
-    from taurus.qt.qtgui.container import TaurusWidget
-import PyTango
+from taurus.qt.qtgui.container import TaurusWidget
+from tango import EventType
 
 
 class MAXLineEdit (TaurusValueLineEdit):
 
-    """A TaurusValueLineEdit tweaked to fit MAXIV purposes. Changes:
+    """
+    A TaurusValueLineEdit tweaked to fit MAXIV purposes. Changes:
 
     - The current digit (left of the cursor) can be in- or decremented
     by pressing the up/down arrow keys. If autoApply is activated, the
@@ -40,8 +38,9 @@ class MAXLineEdit (TaurusValueLineEdit):
 
     def _stepBy(self, steps):
 
-        """try to figure out which digit the cursor is at, and step by one in
-        that digit."""
+        """
+        try to figure out which digit the cursor is at, and step by one in that digit.
+        """
 
         text = str(self.text())
         cursor = len(text) - self.cursorPosition()
@@ -83,23 +82,25 @@ class MAXLineEdit (TaurusValueLineEdit):
 
     def handleEvent(self, evt_src, evt_type, evt_value):
         TaurusValueLineEdit.handleEvent(self, evt_src, evt_type, evt_value)
-        if evt_type in (PyTango.EventType.PERIODIC_EVENT,
-                        PyTango.EventType.CHANGE_EVENT):
+        if evt_type in (EventType.PERIODIC_EVENT,
+                        EventType.CHANGE_EVENT):
                         # taurus.core.taurusbasetypes.TaurusEventType.Periodic,
                         # taurus.core.taurusbasetypes.TaurusEventType.Change):
             if not self._focus:
                 self._w_value = evt_value.w_value
                 self.w_value_trigger.emit()
-        elif evt_type in (PyTango.EventType.ATTR_CONF_EVENT,
-                          PyTango.EventType.QUALITY_EVENT):
+        elif evt_type in (EventType.ATTR_CONF_EVENT,
+                          EventType.QUALITY_EVENT):
             # update the wheel delta to correspond to the LSD
             digits = self._decimalDigits(evt_value.format)
             if digits is not None:
                 self._wheel_delta = pow(10, -digits)
 
     def _decimalDigits(self, fmt):
-        '''returns the number of decimal digits from a format string
-        (or None if they are not defined)'''
+        """
+        returns the number of decimal digits from a format string
+        (or None if they are not defined)
+        """
         try:
             if fmt[-1].lower() in ['f', 'g'] and '.' in fmt:
                 return int(fmt[:-1].split('.')[-1])
@@ -113,7 +114,8 @@ class MAXLineEdit (TaurusValueLineEdit):
         self.writeValue()
 
     def throttledWrite(self, delta):
-        """Intead of writing to Tango every time the value changes, we start a
+        """
+        Intead of writing to Tango every time the value changes, we start a
         timer. Writes during the timer will be accumulated and when the timer
         runs out, the last value is written.
         """

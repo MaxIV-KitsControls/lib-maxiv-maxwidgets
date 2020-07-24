@@ -1,7 +1,6 @@
 from taurus.external.qt.QtCore import QSize
 from taurus.external.qt import QtCore
 from taurus.external.qt.QtGui import QIcon, QPushButton, QWidget
-from taurus.external.qt import Qt
 from taurus.qt.qtgui.panel import TaurusValue
 
 

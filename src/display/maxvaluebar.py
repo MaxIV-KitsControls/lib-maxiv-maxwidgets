@@ -1,21 +1,15 @@
 #!/usr/bin/env python
 
 
-
 from contextlib import contextmanager
 from math import log10
 
-import PyQt4.Qt as Qt
-from PyQt4 import QtCore, QtGui
-
-import PyTango
-from taurus import Configuration
+import PyQt5.Qt as Qt
+from PyQt5 import QtCore, QtGui
+from tango import EventType
 from taurus.core.taurusoperation import WriteAttrOperation
 from taurus.qt.qtgui.base import TaurusBaseWritableWidget
-try:
-    from taurus.qt.qtgui.panel import TaurusWidget
-except ImportError:
-    from taurus.qt.qtgui.container import TaurusWidget
+from taurus.qt.qtgui.container import TaurusWidget
 
 
 __all__ = ["MAXValueBar"]
@@ -250,8 +244,10 @@ class MAXValueBar(QtGui.QWidget, TaurusBaseWritableWidget):
         self.conf_trigger.emit()
 
     def _decimalDigits(self, fmt):
-        '''returns the number of decimal digits from a format string
-        (or None if they are not defined)'''
+        """
+        returns the number of decimal digits from a format string
+        (or None if they are not defined)
+        """
         # TODO: handle "%e" format too
         try:
             if fmt[-1].lower() in 'fg' and '.' in fmt:
@@ -262,8 +258,10 @@ class MAXValueBar(QtGui.QWidget, TaurusBaseWritableWidget):
             return None
 
     def _make_delta(self, fmt):
-        """Return a reasonable step size for the value, taking into
-        account the configured format and limits."""
+        """
+        Return a reasonable step size for the value, taking into
+        account the configured format and limits.
+        """
         digits = self._decimalDigits(fmt)
         if digits is not None:
             if fmt.endswith("e"):
@@ -292,8 +290,8 @@ class MAXValueBar(QtGui.QWidget, TaurusBaseWritableWidget):
             self._wheel_delta = pow(10, -digits)
 
     def handleEvent(self, evt_src, evt_type, evt_value):
-        if evt_type in (PyTango.EventType.PERIODIC_EVENT,
-                        PyTango.EventType.CHANGE_EVENT):
+        if evt_type in (EventType.PERIODIC_EVENT,
+                        EventType.CHANGE_EVENT):
                         # taurus.core.taurusbasetypes.TaurusEventType.Periodic,
                         # taurus.core.taurusbasetypes.TaurusEventType.Change):
             if evt_value.value is not None:
@@ -301,8 +299,8 @@ class MAXValueBar(QtGui.QWidget, TaurusBaseWritableWidget):
             if (evt_value.w_value is not None) and not self._throttle_timer.isActive():
                 self.setValue(evt_value.w_value)
 
-        elif evt_type in (PyTango.EventType.ATTR_CONF_EVENT,
-                          PyTango.EventType.QUALITY_EVENT):
+        elif evt_type in (EventType.ATTR_CONF_EVENT,
+                          EventType.QUALITY_EVENT):
             self.updateConfig(evt_value)
 
     def setValue(self, v):
@@ -329,7 +327,8 @@ class MAXValueBar(QtGui.QWidget, TaurusBaseWritableWidget):
         self.setEnableWheelEvent(False)
 
     def throttledWrite(self, delta):
-        """Intead of writing to Tango every time the value changes, we start a
+        """
+        Intead of writing to Tango every time the value changes, we start a
         timer. Writes during the timer will be accumulated and when the timer
         runs out, the last value is written.
         """

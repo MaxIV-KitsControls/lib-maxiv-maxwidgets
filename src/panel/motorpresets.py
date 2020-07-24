@@ -1,23 +1,15 @@
-import PyTango
-from PyQt4 import QtCore, QtGui, Qt
-from taurus.qt.qtgui.panel import TaurusForm
-try:
-    from taurus.qt.qtgui.panel import TaurusWidget
-except ImportError:
-    from taurus.qt.qtgui.container import TaurusWidget
-from taurus.qt.qtgui.input import TaurusValueComboBox
-from taurus.qt.qtgui.display import TaurusLabel
-
 import taurus
-try:
-    from taurus import tauruscustomsettings  # taurus 3.3
-except ImportError:
-    from taurus import TaurusCustomSettings  # taurus 3.0
+from PyQt5 import QtCore, QtGui
+from taurus import tauruscustomsettings
+from taurus.qt.qtgui.container import TaurusWidget
+from taurus.qt.qtgui.panel import TaurusForm
 
 
 class MotorPresets(TaurusWidget):
 
-    """This is the class for the overall widget of 3 tabs"""
+    """
+    This is the class for the overall widget of 3 tabs
+    """
 
     def __init__(self, parent=None):
         TaurusWidget.__init__(self, parent)
@@ -56,7 +48,9 @@ class MotorPresets(TaurusWidget):
 
 class IORConfigPanel(TaurusWidget):
 
-    """Widget to configure the IOR"""
+    """
+    Widget to configure the IOR
+    """
 
     config_trigger = QtCore.pyqtSignal()
 
@@ -98,9 +92,12 @@ class IORConfigPanel(TaurusWidget):
                     self.oldvalue[src] = attr_val.value
                     self.config_trigger.emit()
 
+
 class IORUserPanel(TaurusWidget):
 
-    """Widget to use the IOR"""
+    """
+    Widget to use the IOR
+    """
 
     def __init__(self, parent=None):
         TaurusWidget.__init__(self, parent)
@@ -199,7 +196,9 @@ class IORUserPanel(TaurusWidget):
 
 class MotorConfigPanel(TaurusWidget):
 
-    """Widget for motor"""
+    """
+    Widget for motor
+    """
 
     def __init__(self, parent=None):
         TaurusWidget.__init__(self, parent)
@@ -242,6 +241,7 @@ def main():
         #app.setCursorFlashTime(0)
         w.show()
         sys.exit(app.exec_())
+
 
 if __name__ == "__main__":
     main()

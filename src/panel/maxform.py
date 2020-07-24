@@ -1,4 +1,3 @@
-
 from taurus.qt.qtgui.input import TaurusValueLineEdit
 from taurus.qt.qtgui.panel import TaurusForm, TaurusValue
 

@@ -1,17 +1,18 @@
+import numpy as np
+import tango
+from taurus.core.taurusbasetypes import TaurusEventType
+from taurus.core.taurusoperation import WriteAttrOperation
 from taurus.external.qt import Qt, QtGui
 from taurus.qt.qtgui.base import TaurusBaseWritableWidget
-from taurus.core.taurusoperation import WriteAttrOperation
-from taurus.core.taurusbasetypes import TaurusEventType
-import numpy as np
-import PyTango
+
 
 class MAXQArrayLineEdit(QtGui.QWidget):
     """
     Creates a QLineedit for every element in an array, send the pyqtsignals together the same
     way as they would have if they where alone
     """
-    textChanged     = Qt.pyqtSignal(object)
-    returnPressed   = Qt.pyqtSignal()
+    textChanged = Qt.pyqtSignal(object)
+    returnPressed = Qt.pyqtSignal()
     editingFinished = Qt.pyqtSignal()
 
     def __init__(self, parent=None):
@@ -99,7 +100,8 @@ class MAXQArrayLineEdit(QtGui.QWidget):
 
 
 class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
-    """Similar to TaurusValueLineEdit but displays one lineedit for each
+    """
+    Similar to TaurusValueLineEdit but displays one lineedit for each
     item in a 1D array. Suitable for editing e.g. an array of three values x,y,t
     """
     def __init__(self, parent=None, designMode=False):
@@ -124,14 +126,12 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
         except (AttributeError, TypeError):
             return
 
-
-    def setModel(self,model):
+    def setModel(self, model):
         """
         Set model and fix number of elements displayed.
         """
         TaurusBaseWritableWidget.setModel(self, model)
         self._fixnumberofelements()
-
 
     def setValue(self, v):
         """
@@ -146,7 +146,6 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
         attr_type = self.getModelObj().getValueObj().value.dtype
         arr = self.array(astype=attr_type)
         return arr
-
 
     def updatePendingOperations(self):
         """
@@ -178,13 +177,16 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
         self.setStyleSheet('QLineEdit {color: %s; font-weight: %s}'%(color,weight))
 
     def _onEditingFinished(self):
-        '''slot for performing autoapply only when edition is finished'''
+        """
+        slot for performing autoapply only when edition is finished
+        """
         if self._autoApply:
             self.writeValue()
 
     def handleEvent(self, evt_src, evt_type, evt_value):
         """
-        Adding the validator from here, also if config event, fix the number of elements displayed
+        Adding the validator from here, also if config event, fix the number of
+        elements displayed
         """
         if evt_type == TaurusEventType.Config:
             self._fixnumberofelements()
@@ -192,12 +194,14 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
         TaurusBaseWritableWidget.handleEvent(self, evt_src, evt_type, evt_value)
 
     def _updateValidator(self, attrinfo):
-        '''This method sets a validator depending on the data type
-        attrinfo is an AttributeInfoEx object'''
-        if PyTango.is_int_type(attrinfo.data_type):
+        """
+        This method sets a validator depending on the data type
+        attrinfo is an AttributeInfoEx object
+        """
+        if tango.is_int_type(attrinfo.data_type):
             validator = Qt.QIntValidator(self) #initial range is -2147483648 to 2147483647 (and cannot be set larger)
             self.setValidator(validator)
-        elif PyTango.is_float_type(attrinfo.data_type):
+        elif tango.is_float_type(attrinfo.data_type):
             validator= Qt.QDoubleValidator(self)
             self.setValidator(validator)
         else:

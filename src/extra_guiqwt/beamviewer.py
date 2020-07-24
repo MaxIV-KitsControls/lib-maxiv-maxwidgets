@@ -1,15 +1,14 @@
 import taurus
-
 from guiqwt.plot import ImageWindow
 from guiqwt.styles import ImageParam
-
-from taurus.qt import Qt
+from taurus.external.qt import Qt
 from taurus.qt.qtgui.base import TaurusBaseWidget
-from taurus.qt.qtgui.extra_guiqwt.image import TaurusEncodedImageItem
 from taurus.qt.qtgui.dialog import TaurusMessageBox
+from taurus.qt.qtgui.extra_guiqwt.image import TaurusEncodedImageItem
 
-#from tools import StartTool, StopTool, SettingsTool
-from maxwidgets.extra_guiqwt.tools import StartTool, StopTool, SettingsTool
+# from tools import StartTool, StopTool, SettingsTool
+from maxwidgets.extra_guiqwt.tools import SettingsTool, StartTool, StopTool
+
 
 def alert_problems(meth):
     def _alert_problems(self, *args, **kws):
@@ -173,6 +172,7 @@ def main():
     widget.show()
         
     sys.exit(app.exec_())
+
 
 if __name__ == '__main__':
     main()

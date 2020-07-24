@@ -1,17 +1,16 @@
 from guiqwt.tools import CommandTool, DefaultToolbarID
-
-from taurus.qt import Qt
+from taurus.external.qt import Qt
 from taurus.qt.qtgui.resource import getIcon
 
-#from ui.ui_CameraSettingsDialog import Ui_CameraSettingsDialog
+# from ui.ui_CameraSettingsDialog import Ui_CameraSettingsDialog
 from maxwidgets.extra_guiqwt.ui.ui_CameraSettingsDialog import Ui_CameraSettingsDialog
 
-IMAGE_TYPES = {'Bpp8'  : 0,
-               'Bpp12' : 4,
-               'Bpp16' : 8}
+IMAGE_TYPES = {'Bpp8': 0,
+               'Bpp12': 4,
+               'Bpp16': 8}
 
-TRIGGER_MODES = {'INTERNAL' : 0,
-                 'EXTERNAL' : 2}
+TRIGGER_MODES = {'INTERNAL': 0,
+                 'EXTERNAL': 2}
 
 
 class CameraSettingsDialog(Qt.QDialog):

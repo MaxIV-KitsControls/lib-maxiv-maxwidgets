@@ -1,21 +1,16 @@
 import sys
-import PyTango
-try:
-    from taurus.qt import Qt, QtGui
-except ImportError:
-    from taurus.external.qt import Qt, QtGui
-from taurus.qt.qtgui.container import TaurusWidget
+
+from tango import DevState
+from taurus.external.qt import Qt, QtGui
 from taurus.qt.qtgui.button import TaurusCommandButton
-from taurus.qt.qtgui.panel import TaurusDevicePanel
-from taurus.qt.qtgui.display import TaurusLed
-from taurus.qt.qtgui.panel.taurusvalue import \
-    TaurusValue, DefaultLabelWidget
-
+from taurus.qt.qtgui.container import TaurusWidget
 from taurus.qt.qtgui.dialog import TaurusMessageBox
-
-State = PyTango.DevState
-
+from taurus.qt.qtgui.display import TaurusLed
 from taurus.qt.qtgui.display.taurusled import _TaurusLedController
+from taurus.qt.qtgui.panel import TaurusDevicePanel
+from taurus.qt.qtgui.panel.taurusvalue import DefaultLabelWidget, TaurusValue
+
+State = DevState
 
 
 class _YAGLedController(_TaurusLedController):
@@ -186,6 +181,7 @@ def main():
     form.show()
 
     sys.exit(app.exec_())
+
 
 if __name__ == '__main__':
     main()
