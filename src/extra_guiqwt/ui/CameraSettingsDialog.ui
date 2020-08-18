@@ -72,7 +72,7 @@
  <customwidgets>
   <customwidget>
    <class>TaurusWidget</class>
-   <extends>QtWidget</extends>
+   <extends>QWidget</extends>
    <header>taurus.qt.qtgui.container</header>
    <container>1</container>
   </customwidget>
