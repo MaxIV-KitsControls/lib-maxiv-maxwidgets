@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 import json
-from taurus.external.qt import Qt, QtGui
+from taurus.external.qt import Qt, QtGui, QtWidgets
 from taurus.qt.qtgui.container import TaurusWidget, TaurusScrollArea
 from taurus.qt.qtgui.button import TaurusCommandButton
 
@@ -45,11 +45,11 @@ class TaurusCommandButtonPanel(TaurusWidget):
         TaurusWidget.__init__(self, parent, designmode)
         self._modelcommands = []
         self._buttons = []
-        self.setLayout(Qt.QGridLayout())
+        self.setLayout(QtWidgets.QGridLayout())
 
         self.frame = TaurusWidget(self)
         self.frame.setUseParentModel(True)
-        self.frame.setLayout(Qt.QGridLayout())
+        self.frame.setLayout(QtWidgets.QGridLayout())
 
         self.scrollArea = TaurusScrollArea(self)
         self.scrollArea.setUseParentModel(True)

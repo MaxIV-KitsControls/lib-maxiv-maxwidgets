@@ -1,6 +1,6 @@
 from taurus.external.qt.QtCore import QSize
 from taurus.external.qt import QtCore
-from taurus.external.qt.QtGui import QIcon, QPushButton, QWidget
+from taurus.external.qt.QtGui import QIcon, QPushButton, QtWidget
 from taurus.qt.qtgui.panel import TaurusValue
 
 
@@ -34,11 +34,11 @@ class ResettableTaurusValue(TaurusValue):
     def getDefaultExtraWidgetClass(self):
         # Unfortunately, the TaurusForm seems to freak out a bit if
         # we don't return a widget here, if there are other values
-        # that have reset buttons. So we return an empty QWidget.
+        # that have reset buttons. So we return an empty QtWidget.
         return DummyExtraWidget
 
 
-class DummyExtraWidget(QWidget):
+class DummyExtraWidget(QtWidget):
     "Just a placeholder"
     def __init__(self, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)

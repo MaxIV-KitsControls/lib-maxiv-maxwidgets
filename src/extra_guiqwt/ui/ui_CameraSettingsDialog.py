@@ -7,7 +7,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -27,11 +27,11 @@ class Ui_CameraSettingsDialog(object):
     def setupUi(self, CameraSettingsDialog):
         CameraSettingsDialog.setObjectName(_fromUtf8("CameraSettingsDialog"))
         CameraSettingsDialog.resize(271, 162)
-        self.verticalLayout = QtGui.QVBoxLayout(CameraSettingsDialog)
+        self.verticalLayout = QtWidgets.QVBoxLayout(CameraSettingsDialog)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.taurusWidget = TaurusWidget(CameraSettingsDialog)
         self.taurusWidget.setObjectName(_fromUtf8("taurusWidget"))
-        self.gridLayout = QtGui.QGridLayout(self.taurusWidget)
+        self.gridLayout = QtWidgets.QGridLayout(self.taurusWidget)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.label_3 = QtGui.QLabel(self.taurusWidget)
         self.label_3.setObjectName(_fromUtf8("label_3"))

@@ -1,7 +1,7 @@
 import sys
 
 from tango import DevState
-from taurus.external.qt import Qt, QtGui
+from taurus.external.qt import Qt, QtGui, QtWidgets
 from taurus.qt.qtgui.button import TaurusCommandButton
 from taurus.qt.qtgui.container import TaurusWidget
 from taurus.qt.qtgui.dialog import TaurusMessageBox
@@ -75,7 +75,7 @@ class YAGScreenTVReadWidget(TaurusWidget):
 
     def __init__(self, *args):
         TaurusWidget.__init__(self, *args)
-        self.setLayout(QtGui.QHBoxLayout())
+        self.setLayout(QtWidgets.QHBoxLayout())
         self.layout().setMargin(0)
 
         led = YAGLed(self)

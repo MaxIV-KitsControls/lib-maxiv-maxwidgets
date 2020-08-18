@@ -87,11 +87,11 @@ class install_data(_install_data):
         _install_data.run(self)
 
 
-setup(name='python-maxwidgets',
-      version='0.9.6',
+setup(name='python3-maxwidgets',
+      version='1.0.0',
       description='A collection of reusable Taurus widgets',
       packages=packages,
-      package_dir={'maxwidgets' : 'src'},
+      package_dir={'maxwidgets': 'src'},
       data_files=[('/etc/profile.d', [env_script])],
       cmdclass={  # 'build_py' : build_py,
-                  'install_data' : install_data},)
+                  'install_data': install_data},)

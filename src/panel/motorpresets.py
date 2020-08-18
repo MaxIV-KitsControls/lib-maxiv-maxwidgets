@@ -17,7 +17,7 @@ class MotorPresets(TaurusWidget):
 
     def _setup_ui(self):
 
-        hbox = QtGui.QHBoxLayout(self)
+        hbox = QtWidgets.QHBoxLayout(self)
         self.setLayout(hbox)
         tabs = QtGui.QTabWidget()
         hbox.addWidget(tabs)
@@ -64,7 +64,7 @@ class IORConfigPanel(TaurusWidget):
         self.userwidget.updateBoxes(True)
 
     def _setup_ui(self):
-        self.gridLayout = QtGui.QGridLayout(self)
+        self.gridLayout = QtWidgets.QGridLayout(self)
         self.taurusForm = TaurusForm(self)
         self.taurusForm.setWithButtons(False)
         self.gridLayout.addWidget(self.taurusForm, 0, 0, 1, 2)
@@ -114,7 +114,7 @@ class IORUserPanel(TaurusWidget):
 
     def _setup_ui(self):
 
-        self.gridLayout = QtGui.QGridLayout(self)
+        self.gridLayout = QtWidgets.QGridLayout(self)
         self.taurusForm = TaurusForm(self)
 
 
@@ -206,7 +206,7 @@ class MotorConfigPanel(TaurusWidget):
 
     def _setup_ui(self):
 
-        self.gridLayout = QtGui.QGridLayout(self)
+        self.gridLayout = QtWidgets.QGridLayout(self)
         self.taurusForm = TaurusForm(self)
         self.taurusForm.setWithButtons(False)
 

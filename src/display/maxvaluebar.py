@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from math import log10
 
 import PyQt5.Qt as Qt
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from tango import EventType
 from taurus.core.taurusoperation import WriteAttrOperation
 from taurus.qt.qtgui.base import TaurusBaseWritableWidget
@@ -17,7 +17,7 @@ __all__ = ["MAXValueBar"]
 __docformat__ = 'restructuredtext'
 
 
-class ValueBarWidget(QtGui.QWidget):
+class ValueBarWidget(QtWidgets.QWidget):
 
     def __init__(self):
         super(ValueBarWidget, self).__init__()
@@ -196,7 +196,7 @@ def float_or_none(value):
         return None
 
 
-class MAXValueBar(QtGui.QWidget, TaurusBaseWritableWidget):
+class MAXValueBar(QtWidgets.QWidget, TaurusBaseWritableWidget):
 
     value_trigger = QtCore.pyqtSignal(float)
     w_value_trigger = QtCore.pyqtSignal(float)
@@ -206,7 +206,7 @@ class MAXValueBar(QtGui.QWidget, TaurusBaseWritableWidget):
     _delta = 1
 
     def __init__(self, parent=None, designMode=False):
-        QtGui.QWidget.__init__(self, parent)
+        QtWidgets.QWidget.__init__(self, parent)
         TaurusBaseWritableWidget.__init__(self, "fisk", taurus_parent=parent, designMode=designMode)
         self._enableWheelEvent = True
 
@@ -218,7 +218,7 @@ class MAXValueBar(QtGui.QWidget, TaurusBaseWritableWidget):
         self._throttle_timer = QtCore.QTimer()
         self._throttle_timer.setInterval(200)
         self._throttle_timer.setSingleShot(True)
-        self.connect(self._throttle_timer, QtCore.SIGNAL("timeout()"), self._writeValue)
+        self._throttle_timer.timeout.connect(self._writeValue)
 
     @classmethod
     def getQtDesignerPluginInfo(cls):
@@ -230,7 +230,7 @@ class MAXValueBar(QtGui.QWidget, TaurusBaseWritableWidget):
         return ret
 
     def _setup_ui(self):
-        vbox = QtGui.QHBoxLayout(self)
+        vbox = QtWidgets.QHBoxLayout(self)
         self.valuebar = ValueBarWidget()
         vbox.addWidget(self.valuebar)
         self.setLayout(vbox)
@@ -338,10 +338,10 @@ class MAXValueBar(QtGui.QWidget, TaurusBaseWritableWidget):
 
     def wheelEvent(self, evt):
         if not self.getEnableWheelEvent():
-            return QtGui.QWidget.QWheelEvent(self, evt)
+            return QtWidgets.QWidget.QWheelEvent(self, evt)
         model = self.getModelObj()
         if model is None or not model.isNumeric():
-            return QtGui.QWidget.QWheelEvent(self, evt)
+            return QtWidgets.QWidget.QWheelEvent(self, evt)
 
         evt.accept()
         degrees = evt.delta() / 8

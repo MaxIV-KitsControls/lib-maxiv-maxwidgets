@@ -78,7 +78,7 @@ class GammaSPCeTVReadWidget(TaurusWidget):
 
     def __init__(self, *args):
         TaurusWidget.__init__(self, *args)
-        self.setLayout(QtGui.QHBoxLayout())
+        self.setLayout(QtWidgets.QHBoxLayout())
         self.layout().setMargin(0)
         self.layout().setSpacing(0)
 

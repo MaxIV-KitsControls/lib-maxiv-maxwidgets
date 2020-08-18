@@ -2,11 +2,11 @@ import numpy as np
 import tango
 from taurus.core.taurusbasetypes import TaurusEventType
 from taurus.core.taurusoperation import WriteAttrOperation
-from taurus.external.qt import Qt, QtGui
+from taurus.external.qt import Qt, QtGui, QtWidgets
 from taurus.qt.qtgui.base import TaurusBaseWritableWidget
 
 
-class MAXQArrayLineEdit(QtGui.QWidget):
+class MAXQArrayLineEdit(QtWidgets.QWidget):
     """
     Creates a QLineedit for every element in an array, send the pyqtsignals together the same
     way as they would have if they where alone
@@ -16,7 +16,7 @@ class MAXQArrayLineEdit(QtGui.QWidget):
     editingFinished = Qt.pyqtSignal()
 
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        QtWidgets.QWidget.__init__(self, parent)
         self.setLayout(QtGui.QHBoxLayout())
         self.layout().setMargin(0)
         self.layout().setSpacing(0)
@@ -215,8 +215,8 @@ if __name__ == "__main__":
     else:
         attr_name = "sys/tg_test/1/float_spectrum"
     a = Qt.QApplication([])
-    panel = Qt.QWidget()
-    l = Qt.QGridLayout()
+    panel = QtWidgets.QtWidget()
+    l = QtWidgets.QGridLayout()
     w1 = MAXTaurusArrayLineEdit()
     w1.setModel(attr_name)
     l.addWidget(w1,0,0)
