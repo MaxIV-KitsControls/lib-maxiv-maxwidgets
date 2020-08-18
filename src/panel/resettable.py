@@ -1,19 +1,19 @@
 from taurus.external.qt.QtCore import QSize
-from taurus.external.qt import QtCore
-from taurus.external.qt.QtGui import QIcon, QPushButton, QtWidget
+from taurus.external.qt import QtCore, QtWidgets
+from taurus.external.qt.QtGui import QIcon, QPushButton
 from taurus.qt.qtgui.panel import TaurusValue
 
 
 class ResettableTaurusValue(TaurusValue):
 
-    "A TaurusValue with a reset button (if writable)."
+    """A TaurusValue with a reset button (if writable)."""
 
     def __init__(self, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
         self._storedValue = None
 
     def storeCurrentValue(self):
-        "Keep the attribute value from when the widget is created"
+        """Keep the attribute value from when the widget is created"""
         attr = self.getModelValueObj()
         self._storedValue = attr.w_value
 
@@ -34,12 +34,12 @@ class ResettableTaurusValue(TaurusValue):
     def getDefaultExtraWidgetClass(self):
         # Unfortunately, the TaurusForm seems to freak out a bit if
         # we don't return a widget here, if there are other values
-        # that have reset buttons. So we return an empty QtWidget.
+        # that have reset buttons. So we return an empty QWidget.
         return DummyExtraWidget
 
 
-class DummyExtraWidget(QtWidget):
-    "Just a placeholder"
+class DummyExtraWidget(QtWidgets.QWidget):
+    """Just a placeholder"""
     def __init__(self, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
         self.setFixedWidth(0)
@@ -47,7 +47,7 @@ class DummyExtraWidget(QtWidget):
 
 class ValueResetButton(QPushButton):
 
-    "A button to store/reset a write-value"
+    """A button to store/reset a write-value"""
 
     # TODO: right-click to store value
 
