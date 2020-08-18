@@ -59,7 +59,7 @@ class TaurusCommandButtonPanel(TaurusWidget):
 
         # Adding right click edit action
         self.setContextMenuPolicy(Qt.Qt.ActionsContextMenu)
-        self.chooseCommandsAction = Qt.QAction('Modify commands', self)
+        self.chooseCommandsAction = Qt.QAction("Modify commands", self)
         self.addAction(self.chooseCommandsAction)
         self.chooseCommandsAction.triggered.connect(self.chooseCommands)
 
@@ -68,7 +68,7 @@ class TaurusCommandButtonPanel(TaurusWidget):
         # Make it saveable
         self.registerConfigProperty(self.commandsToConfig,
                                     self.commandsFromConfig,
-                                    'commands')
+                                    "commands")
 
     def setModelCommands(self, modelcommands):
         """
@@ -94,19 +94,19 @@ class TaurusCommandButtonPanel(TaurusWidget):
         """
         for modelcommand in self._modelcommands:
             button = TaurusCommandButton(self.frame)
-            button.setCommand(modelcommand['command'])
-            if 'model' in modelcommand:
-                button.setModel(modelcommand['model'])
+            button.setCommand(modelcommand["command"])
+            if "model" in modelcommand:
+                button.setModel(modelcommand["model"])
             else:
                 button.setUseParentModel(True)
-            if 'customtext' in modelcommand:
-                button.setCustomText(modelcommand['customtext'])
-            if 'dangermessage' in modelcommand:
-                button.setDangerMessage(modelcommand['dangermessage'])
-            if 'parameters' in modelcommand:
-                button.setParameters(modelcommand['parameters'])
-            if 'timeout' in modelcommand:
-                button.setTimeout(modelcommand['timeout'])
+            if "customtext" in modelcommand:
+                button.setCustomText(modelcommand["customtext"])
+            if "dangermessage" in modelcommand:
+                button.setDangerMessage(modelcommand["dangermessage"])
+            if "parameters" in modelcommand:
+                button.setParameters(modelcommand["parameters"])
+            if "timeout" in modelcommand:
+                button.setTimeout(modelcommand["timeout"])
             button.commandExecuted.connect(self.onCommandExectued)
             # Make button expand vertically
             button.setSizePolicy(QtGui.QSizePolicy.Minimum,
@@ -123,17 +123,17 @@ class TaurusCommandButtonPanel(TaurusWidget):
         if len(self._modelcommands) > 0:
             modelcommands = self._modelcommands
         else:
-            modelcommands = [{'model': 'sys/tg_test/1', 'command': 'DevVoid'}]
+            modelcommands = [{"model": "sys/tg_test/1", "command": "DevVoid"}]
 
         cmdstr = json.dumps(modelcommands)
         text, ok = QtGui.QInputDialog.getText(None,
-                                              'Enter commands json dict',
-                                              'Enter dicts in a list: <br>' +
-                                              'Dict contents:<br>' +
-                                              'model, command <br>' +
-                                              'Optional dict keys: ' +
-                                              'customtext, dangermessage, ' +
-                                              'parameters, timeout',
+                                              "Enter commands json dict",
+                                              "Enter dicts in a list: <br>" +
+                                              "Dict contents:<br>" +
+                                              "model, command <br>" +
+                                              "Optional dict keys: " +
+                                              "customtext, dangermessage, " +
+                                              "parameters, timeout",
                                               QtGui.QLineEdit.Normal,
                                               cmdstr)
         if ok:
@@ -160,9 +160,9 @@ class TaurusCommandButtonPanel(TaurusWidget):
             print("Command executed and returned None")
             return
         cmdbutton = self.sender()
-        output = ('<b>Command:</b> ' + cmdbutton.getCommand() + '<br>' +
-                  '<b>Pars:</b> ' + repr(cmdbutton.getParameters()) + '<br>' +
-                  '<b>Return Value:</b><br>' + str(result))
+        output = ("<b>Command:</b> " + cmdbutton.getCommand() + "<br>" +
+                  "<b>Pars:</b> " + repr(cmdbutton.getParameters()) + "<br>" +
+                  "<b>Return Value:</b><br>" + str(result))
         QtGui.QMessageBox.information(None, "Return", output)
 
 

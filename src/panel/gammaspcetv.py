@@ -2,7 +2,7 @@ import sys
 from functools import partial
 
 from tango import DevFailed
-from taurus.external.qt import Qt, QtGui
+from taurus.external.qt import Qt, QtWidgets
 from taurus.qt.qtgui.container import TaurusWidget
 from taurus.qt.qtgui.dialog import TaurusMessageBox
 from taurus.qt.qtgui.display import TaurusLed
@@ -19,41 +19,41 @@ class GammaSPCeTVLabelWidget(DefaultLabelWidget):
 
     def contextMenuEvent(self, event):
         action_display_current = Qt.QAction(self)
-        action_display_current.setText('Display Current')
+        action_display_current.setText("Display Current")
         action_display_current.setCheckable(True)
-        action_display_current.setChecked(self.taurusValueBuddy().getDisplayAttr() == 'current')
-        slot = partial(self.taurusValueBuddy().setDisplayAttr, 'current')
-        self.connect(action_display_current, Qt.SIGNAL('toggled(bool)'), slot)
+        action_display_current.setChecked(self.taurusValueBuddy().getDisplayAttr() == "current")
+        slot = partial(self.taurusValueBuddy().setDisplayAttr, "current")
+        action_display_current.toggled.connect(slot)
 
         action_display_pressure = Qt.QAction(self)
-        action_display_pressure.setText('Display Pressure')
+        action_display_pressure.setText("Display Pressure")
         action_display_pressure.setCheckable(True)
-        action_display_pressure.setChecked(self.taurusValueBuddy().getDisplayAttr() == 'pressure')
-        slot = partial(self.taurusValueBuddy().setDisplayAttr, 'pressure')
-        self.connect(action_display_pressure, Qt.SIGNAL('toggled(bool)'), slot)
+        action_display_pressure.setChecked(self.taurusValueBuddy().getDisplayAttr() == "pressure")
+        slot = partial(self.taurusValueBuddy().setDisplayAttr, "pressure")
+        action_display_pressure.toggled.connect(slot)
 
         action_display_voltage = Qt.QAction(self)
-        action_display_voltage.setText('Display Voltage')
+        action_display_voltage.setText("Display Voltage")
         action_display_voltage.setCheckable(True)
-        action_display_voltage.setChecked(self.taurusValueBuddy().getDisplayAttr() == 'voltage')
-        slot = partial(self.taurusValueBuddy().setDisplayAttr, 'voltage')
-        self.connect(action_display_voltage, Qt.SIGNAL('toggled(bool)'), slot) 
+        action_display_voltage.setChecked(self.taurusValueBuddy().getDisplayAttr() == "voltage")
+        slot = partial(self.taurusValueBuddy().setDisplayAttr, "voltage")
+        action_display_voltage.toggled.connect(slot)
 
         action_device_panel = Qt.QAction(self)
-        action_device_panel.setText('Show Device Panel')
-        self.connect(action_device_panel, Qt.SIGNAL('triggered()'), self.taurusValueBuddy().showDevicePanel)
+        action_device_panel.setText("Show Device Panel")
+        action_device_panel.triggered.connect(self.taurusValueBuddy().showDevicePanel)
 
         action_start = Qt.QAction(self)
-        action_start.setText('Start')
-        self.connect(action_start, Qt.SIGNAL('triggered()'), self.taurusValueBuddy().start)
+        action_start.setText("Start")
+        action_start.triggered.connect(self.taurusValueBuddy().start)
 
         action_stop = Qt.QAction(self)
-        action_stop.setText('Stop')
-        self.connect(action_stop, Qt.SIGNAL('triggered()'), self.taurusValueBuddy().stop)
+        action_stop.setText("Stop")
+        action_stop.triggered.connect(self.taurusValueBuddy().stop)
 
         action_reconnect = Qt.QAction(self)
-        action_reconnect.setText('Reconnect')
-        self.connect(action_reconnect, Qt.SIGNAL('triggered()'), self.taurusValueBuddy().reconnect)
+        action_reconnect.setText("Reconnect")
+        action_reconnect.triggered.connect(self.taurusValueBuddy().reconnect)
 
         menu = Qt.QMenu(self)
         menu.addAction(action_device_panel)
@@ -79,12 +79,11 @@ class GammaSPCeTVReadWidget(TaurusWidget):
     def __init__(self, *args):
         TaurusWidget.__init__(self, *args)
         self.setLayout(QtWidgets.QHBoxLayout())
-        self.layout().setMargin(0)
         self.layout().setSpacing(0)
 
         self.led = TaurusLed(self)
         self.led.setUseParentModel(True)
-        self.led.setModel('/State')
+        self.led.setModel("/State")
         self.led.getFormatedToolTip = self.getFormatedToolTip
         self.led.setSizePolicy(Qt.QSizePolicy.Fixed, Qt.QSizePolicy.Fixed)
 
@@ -100,58 +99,59 @@ class GammaSPCeTVReadWidget(TaurusWidget):
     def setModel(self, model):
         TaurusWidget.setModel(self, model)
         display_attr = self.taurusValueBuddy().getDisplayAttr()
-        self.label.setModel('/' + display_attr)
+        self.label.setModel("/" + display_attr)
 
 
 class GammaSPCeTVWriteWidget(TaurusValueLineEdit):
 
     def setModel(self, model):
         if not model:
-            TaurusValueLineEdit.setModel(self, '')
+            TaurusValueLineEdit.setModel(self, "")
         else:
             display_attr = self.taurusValueBuddy().getDisplayAttr()
-            TaurusValueLineEdit.setModel(self, model + '/' + display_attr)
+            TaurusValueLineEdit.setModel(self, model + "/" + display_attr)
 
 
 class GammaSPCeTVUnitsWidget(DefaultUnitsWidget):
 
     def setModel(self, model):
         if not model:
-            DefaultUnitsWidget.setModel(self, '')
+            DefaultUnitsWidget.setModel(self, "")
         else:
             display_attr = self.taurusValueBuddy().getDisplayAttr()
-            DefaultUnitsWidget.setModel(self, model + '/' + display_attr)
+            DefaultUnitsWidget.setModel(self, model + "/" + display_attr)
 
 
 class GammaSPCeTV(TaurusValue):
 
-    display_attr = 'pressure'
+    display_attr = "pressure"
 
     def __init__(self, parent=None):
         TaurusValue.__init__(self, parent)
         self.setLabelWidgetClass(GammaSPCeTVLabelWidget)
         self.setReadWidgetClass(GammaSPCeTVReadWidget)
         self.setUnitsWidgetClass(GammaSPCeTVUnitsWidget)
-        self.setLabelConfig('dev_name')
+        self.setLabelConfig("dev_name")
 
     def getFormatedToolTip(self, cache=False):
-        tool_tip = [('name', self.getModel())]
-        status_info = ''
+        tool_tip = [("name", self.getModel())]
+        status_info = ""
 
         obj = self.getModelObj()
         if obj is not None:
             try:
-                state = obj.getAttribute('State').read().value
-                status = obj.getAttribute('Status').read().value
+                state = obj.getAttribute("State").read().value
+                status = obj.getAttribute("Status").read().value
             except DevFailed:
                 return
-            tool_tip.append(('state', state))
+            tool_tip.append(("state", state))
             # hack for displaying multi-line status messages
-            status_lines = status.split('\n')
-            status_info = '<TABLE width="500" border="0" cellpadding="1" cellspacing="0"><TR><TD WIDTH="80" ALIGN="RIGHT" VALIGN="MIDDLE"><B>Status:</B></TD><TD>' + status_lines[0] + '</TD></TR>'
+            status_lines = status.split("\n")
+            status_info = ("<TABLE width='500' border='0' cellpadding='1' cellspacing='0'><TR><TD WIDTH='80' "
+                           "ALIGN='RIGHT' VALIGN='MIDDLE'><B>Status:</B></TD><TD>" + status_lines[0] + "</TD></TR>")
             for status_line in status_lines[1:]:
-                status_info += '<TR><TD></TD><TD>' + status_line + '</TD></TR>'
-            status_info += '</TABLE>'
+                status_info += "<TR><TD></TD><TD>" + status_line + "</TD></TR>"
+            status_info += "</TABLE>"
 
         return self.toolTipObjToStr(tool_tip) + status_info
 
@@ -237,5 +237,5 @@ def main():
     sys.exit(app.exec_())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

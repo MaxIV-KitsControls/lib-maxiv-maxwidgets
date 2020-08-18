@@ -11,10 +11,9 @@ from taurus.core.taurusoperation import WriteAttrOperation
 from taurus.qt.qtgui.base import TaurusBaseWritableWidget
 from taurus.qt.qtgui.container import TaurusWidget
 
-
 __all__ = ["MAXValueBar"]
 
-__docformat__ = 'restructuredtext'
+__docformat__ = "restructuredtext"
 
 
 class ValueBarWidget(QtWidgets.QWidget):
@@ -99,16 +98,16 @@ class ValueBarWidget(QtWidgets.QWidget):
         ticks = self._get_ticks()
         n = len(ticks) - 1
         qp.setPen(QtGui.QColor(0, 0, 0))
-        qp.drawLine(w, self.pad, w, h+self.pad)
+        qp.drawLine(w, self.pad, w, h + self.pad)
         maxtick = max(ticks)
         mintick = min(ticks)
         height = maxtick - mintick
         scale = h / height
         for i, tick in enumerate(ticks):
-            vpos = h - (tick-mintick)*scale
+            vpos = h - (tick - mintick) * scale
             qp.drawLine(QtCore.QPointF(w, vpos + self.pad),
-                        QtCore.QPointF(w+5, vpos + self.pad))
-            qp.drawText(w+self.pad, vpos + self.pad + fw/2,
+                        QtCore.QPointF(w + 5, vpos + self.pad))
+            qp.drawText(w + self.pad, vpos + self.pad + fw / 2,
                         self._format_tick(tick))
 
     @contextmanager
@@ -116,17 +115,17 @@ class ValueBarWidget(QtWidgets.QWidget):
         """A context manager to set up a QPainter with the current scale as
         transform."""
         size = self.size()
-        h = size.height() - 2*self.pad
+        h = size.height() - 2 * self.pad
 
         qp.translate(0, self.pad)
-        qp.scale(1, -h/(self.max_value - self.min_value))
+        qp.scale(1, -h / (self.max_value - self.min_value))
         qp.translate(0, -self.max_value)
         yield
         qp.resetTransform()
 
     def draw_widget(self, qp):
 
-        font = QtGui.QFont('Serif', 7, QtGui.QFont.Light)
+        font = QtGui.QFont("Serif", 7, QtGui.QFont.Light)
         qp.setFont(font)
 
         metrics = qp.fontMetrics()
@@ -134,7 +133,7 @@ class ValueBarWidget(QtWidgets.QWidget):
         fh = metrics.height()
         size = self.size()
         w = size.width() - (self.pad + fw)
-        h = size.height() - 2*self.pad
+        h = size.height() - 2 * self.pad
 
         # draw things in the value scale
         with self._scale(qp):
@@ -169,7 +168,7 @@ class ValueBarWidget(QtWidgets.QWidget):
             # Value bar
             qp.setPen(QtGui.QColor(0, 200, 0))
             qp.setBrush(QtGui.QColor(0, 200, 0))
-            qp.drawRect(QtCore.QRectF(10, 0, w-2*self.pad, self.value))
+            qp.drawRect(QtCore.QRectF(10, 0, w - 2 * self.pad, self.value))
 
             # Write value line
             qp.setPen(QtGui.QColor(255, 0, 0))
@@ -197,7 +196,6 @@ def float_or_none(value):
 
 
 class MAXValueBar(QtWidgets.QWidget, TaurusBaseWritableWidget):
-
     value_trigger = QtCore.pyqtSignal(float)
     w_value_trigger = QtCore.pyqtSignal(float)
     conf_trigger = QtCore.pyqtSignal()
@@ -223,10 +221,10 @@ class MAXValueBar(QtWidgets.QWidget, TaurusBaseWritableWidget):
     @classmethod
     def getQtDesignerPluginInfo(cls):
         ret = TaurusWidget.getQtDesignerPluginInfo()
-        ret['module'] = 'maxvaluebar'
-        ret['group'] = 'MAX-lab Taurus Widgets'
-        ret['container'] = ':/designer/frame.png'
-        ret['container'] = False
+        ret["module"] = "maxvaluebar"
+        ret["group"] = "MAX-lab Taurus Widgets"
+        ret["container"] = ":/designer/frame.png"
+        ret["container"] = False
         return ret
 
     def _setup_ui(self):
@@ -250,8 +248,8 @@ class MAXValueBar(QtWidgets.QWidget, TaurusBaseWritableWidget):
         """
         # TODO: handle "%e" format too
         try:
-            if fmt[-1].lower() in 'fg' and '.' in fmt:
-                return int(fmt[:-1].split('.')[-1])
+            if fmt[-1].lower() in "fg" and "." in fmt:
+                return int(fmt[:-1].split(".")[-1])
             else:
                 return 1
         except:
@@ -292,8 +290,8 @@ class MAXValueBar(QtWidgets.QWidget, TaurusBaseWritableWidget):
     def handleEvent(self, evt_src, evt_type, evt_value):
         if evt_type in (EventType.PERIODIC_EVENT,
                         EventType.CHANGE_EVENT):
-                        # taurus.core.taurusbasetypes.TaurusEventType.Periodic,
-                        # taurus.core.taurusbasetypes.TaurusEventType.Change):
+            # taurus.core.taurusbasetypes.TaurusEventType.Periodic,
+            # taurus.core.taurusbasetypes.TaurusEventType.Change):
             if evt_value.value is not None:
                 self.valuebar.setValue(evt_value.value)
             if (evt_value.w_value is not None) and not self._throttle_timer.isActive():
@@ -354,7 +352,7 @@ class MAXValueBar(QtWidgets.QWidget, TaurusBaseWritableWidget):
 
         # change the value by 1 in the least significant digit according
         # to the configured format.
-        self.throttledWrite(steps*self._wheel_delta)
+        self.throttledWrite(steps * self._wheel_delta)
 
 
 def main():
@@ -368,5 +366,5 @@ def main():
     sys.exit(app.exec_())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

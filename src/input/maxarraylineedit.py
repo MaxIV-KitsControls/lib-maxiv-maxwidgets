@@ -18,7 +18,6 @@ class MAXQArrayLineEdit(QtWidgets.QWidget):
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
         self.setLayout(QtGui.QHBoxLayout())
-        self.layout().setMargin(0)
         self.layout().setSpacing(0)
         self.emptyLabel = QtGui.QLabel("")
         self.layout().addWidget(self.emptyLabel)
@@ -29,9 +28,12 @@ class MAXQArrayLineEdit(QtWidgets.QWidget):
         Add one qlineedit to the widget, connect it to the coupled signals
         """
         le = QtGui.QLineEdit()
-        self.connect(le, Qt.SIGNAL('textChanged(const QString &)'), self.onTextChanged)
-        self.connect(le, Qt.SIGNAL('returnPressed()'), self.onReturnPresesd)
-        self.connect(le, Qt.SIGNAL('editingFinished()'), self.onEditingFinsihed)
+        le.textChanged.connect(self.onTextChanged)
+        le.returnPressed.connect(self.onReturnPresesd)
+        le.editingFinished.connect(self.onEditingFinsihed)
+        # self.connect(le, Qt.SIGNAL("textChanged(const QString &)"), self.onTextChanged)
+        # self.connect(le, Qt.SIGNAL("returnPressed()"), self.onReturnPresesd)
+        # self.connect(le, Qt.SIGNAL("editingFinished()"), self.onEditingFinsihed)
         self._qlineedits.append(le)
         self.layout().addWidget(le)
 
@@ -40,9 +42,12 @@ class MAXQArrayLineEdit(QtWidgets.QWidget):
         Remove one qlineedit from the widget
         """
         le = self._qlineedits.pop()
-        self.disconnect(le, Qt.SIGNAL('textChanged(const QString &)'), self.onTextChanged)
-        self.disconnect(le, Qt.SIGNAL('returnPressed()'), self.onReturnPresesd)
-        self.disconnect(le, Qt.SIGNAL('editingFinished()'), self.onEditingFinsihed)
+        le.textChanged.disconnect(self.onTextChanged)
+        le.returnPressed.disconnect(self.onReturnPresesd)
+        le.editingFinished.disconnect(self.onEditingFinsihed)
+        # self.disconnect(le, Qt.SIGNAL("textChanged(const QString &)"), self.onTextChanged)
+        # self.disconnect(le, Qt.SIGNAL("returnPressed()"), self.onReturnPresesd)
+        # self.disconnect(le, Qt.SIGNAL("editingFinished()"), self.onEditingFinsihed)
         le.deleteLater()
 
     def onTextChanged(self, arg):
@@ -104,14 +109,16 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
     Similar to TaurusValueLineEdit but displays one lineedit for each
     item in a 1D array. Suitable for editing e.g. an array of three values x,y,t
     """
+
     def __init__(self, parent=None, designMode=False):
         name = self.__class__.__name__
         MAXQArrayLineEdit.__init__(self, parent)
         TaurusBaseWritableWidget.__init__(self, name, designMode=designMode)
-        self.textChanged.connect(self.valueChanged)
+        self.textChanged.connect(self.notifyValueChanged)
         self.returnPressed.connect(self.writeValue)
         self.editingFinished.connect(self._onEditingFinished)
-        self.connect(self, Qt.SIGNAL('valueChanged'), self.updatePendingOperations)
+        self.valueChanged.connect(self.updatePendingOperations)
+        # self.connect(self, Qt.SIGNAL("valueChanged"), self.updatePendingOperations)
 
     def _fixnumberofelements(self):
         """
@@ -119,7 +126,7 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
         If the write value has less elements than the readvalue display the readvalue instead.
         """
         try:
-            read_value  = self.getModelObj().getValueObj().value
+            read_value = self.getModelObj().getValueObj().value
             write_value = self.getModelObj().getValueObj().w_value
             if len(read_value) != len(write_value):
                 self.setArray(read_value)
@@ -171,10 +178,10 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
         Removed validators that only work for scalar numerics
         """
         TaurusBaseWritableWidget.updateStyle(self)
-        color, weight = 'black', 'normal' #default case: the value is in normal range with no pending changes
-        if self.hasPendingOperations(): #the value is in valid range with pending changes
-            color, weight= 'blue','bold'
-        self.setStyleSheet('QLineEdit {color: %s; font-weight: %s}'%(color,weight))
+        color, weight = "black", "normal"  # default case: the value is in normal range with no pending changes
+        if self.hasPendingOperations():  # the value is in valid range with pending changes
+            color, weight = "blue", "bold"
+        self.setStyleSheet("QLineEdit {color: %s; font-weight: %s}" % (color, weight))
 
     def _onEditingFinished(self):
         """
@@ -199,10 +206,10 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
         attrinfo is an AttributeInfoEx object
         """
         if tango.is_int_type(attrinfo.data_type):
-            validator = Qt.QIntValidator(self) #initial range is -2147483648 to 2147483647 (and cannot be set larger)
+            validator = Qt.QIntValidator(self)  # initial range is -2147483648 to 2147483647 (and cannot be set larger)
             self.setValidator(validator)
         elif tango.is_float_type(attrinfo.data_type):
-            validator= Qt.QDoubleValidator(self)
+            validator = Qt.QDoubleValidator(self)
             self.setValidator(validator)
         else:
             self.setValidator(None)
@@ -210,16 +217,17 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
 
 if __name__ == "__main__":
     import sys
+
     if len(sys.argv) > 1:
         attr_name = sys.argv[1]
     else:
         attr_name = "sys/tg_test/1/float_spectrum"
     a = Qt.QApplication([])
-    panel = QtWidgets.QtWidget()
+    panel = QtWidgets.QWidget()
     l = QtWidgets.QGridLayout()
     w1 = MAXTaurusArrayLineEdit()
     w1.setModel(attr_name)
-    l.addWidget(w1,0,0)
+    l.addWidget(w1, 0, 0)
     panel.setLayout(l)
     panel.setVisible(True)
     sys.exit(a.exec_())
