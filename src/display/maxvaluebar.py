@@ -292,10 +292,10 @@ class MAXValueBar(QtWidgets.QWidget, TaurusBaseWritableWidget):
                         EventType.CHANGE_EVENT):
             # taurus.core.taurusbasetypes.TaurusEventType.Periodic,
             # taurus.core.taurusbasetypes.TaurusEventType.Change):
-            if evt_value.value is not None:
-                self.valuebar.setValue(evt_value.value)
-            if (evt_value.w_value is not None) and not self._throttle_timer.isActive():
-                self.setValue(evt_value.w_value)
+            if evt_value.rvalue is not None:
+                self.valuebar.setValue(evt_value.rvalue)
+            if (evt_value.wvalue is not None) and not self._throttle_timer.isActive():
+                self.setValue(evt_value.wvalue)
 
         elif evt_type in (EventType.ATTR_CONF_EVENT,
                           EventType.QUALITY_EVENT):

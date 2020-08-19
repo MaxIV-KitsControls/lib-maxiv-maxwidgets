@@ -16,12 +16,12 @@ except AttributeError:
         return s
 
 try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
+    _encoding = QtWidgets.QApplication.UnicodeUTF8
     def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+        return QtWidgets.QApplication.translate(context, text, disambig, _encoding)
 except AttributeError:
     def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+        return QtWidgets.QApplication.translate(context, text, disambig)
 
 class Ui_CameraSettingsDialog(object):
     def setupUi(self, CameraSettingsDialog):
@@ -33,19 +33,19 @@ class Ui_CameraSettingsDialog(object):
         self.taurusWidget.setObjectName(_fromUtf8("taurusWidget"))
         self.gridLayout = QtWidgets.QGridLayout(self.taurusWidget)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.label_3 = QtGui.QLabel(self.taurusWidget)
+        self.label_3 = QtWidgets.QLabel(self.taurusWidget)
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.gridLayout.addWidget(self.label_3, 0, 0, 1, 1)
         self.imageTypeComboBox = TaurusValueComboBox(self.taurusWidget)
         self.imageTypeComboBox.setObjectName(_fromUtf8("imageTypeComboBox"))
         self.gridLayout.addWidget(self.imageTypeComboBox, 0, 1, 1, 1)
-        self.label_4 = QtGui.QLabel(self.taurusWidget)
+        self.label_4 = QtWidgets.QLabel(self.taurusWidget)
         self.label_4.setObjectName(_fromUtf8("label_4"))
         self.gridLayout.addWidget(self.label_4, 1, 0, 1, 1)
         self.triggerModeComboBox = TaurusValueComboBox(self.taurusWidget)
         self.triggerModeComboBox.setObjectName(_fromUtf8("triggerModeComboBox"))
         self.gridLayout.addWidget(self.triggerModeComboBox, 1, 1, 1, 1)
-        self.label_5 = QtGui.QLabel(self.taurusWidget)
+        self.label_5 = QtWidgets.QLabel(self.taurusWidget)
         self.label_5.setObjectName(_fromUtf8("label_5"))
         self.gridLayout.addWidget(self.label_5, 2, 0, 1, 1)
         self.expTimeLineEdit = MAXLineEdit(self.taurusWidget)
@@ -53,7 +53,7 @@ class Ui_CameraSettingsDialog(object):
         self.expTimeLineEdit.setUseParentModel(False)
         self.expTimeLineEdit.setObjectName(_fromUtf8("expTimeLineEdit"))
         self.gridLayout.addWidget(self.expTimeLineEdit, 2, 1, 1, 1)
-        self.label_6 = QtGui.QLabel(self.taurusWidget)
+        self.label_6 = QtWidgets.QLabel(self.taurusWidget)
         self.label_6.setObjectName(_fromUtf8("label_6"))
         self.gridLayout.addWidget(self.label_6, 3, 0, 1, 1)
         self.gainLineEdit = MAXLineEdit(self.taurusWidget)

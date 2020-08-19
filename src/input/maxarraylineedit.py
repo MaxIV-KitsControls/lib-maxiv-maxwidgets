@@ -31,9 +31,6 @@ class MAXQArrayLineEdit(QtWidgets.QWidget):
         le.textChanged.connect(self.onTextChanged)
         le.returnPressed.connect(self.onReturnPresesd)
         le.editingFinished.connect(self.onEditingFinsihed)
-        # self.connect(le, Qt.SIGNAL("textChanged(const QString &)"), self.onTextChanged)
-        # self.connect(le, Qt.SIGNAL("returnPressed()"), self.onReturnPresesd)
-        # self.connect(le, Qt.SIGNAL("editingFinished()"), self.onEditingFinsihed)
         self._qlineedits.append(le)
         self.layout().addWidget(le)
 
@@ -45,9 +42,6 @@ class MAXQArrayLineEdit(QtWidgets.QWidget):
         le.textChanged.disconnect(self.onTextChanged)
         le.returnPressed.disconnect(self.onReturnPresesd)
         le.editingFinished.disconnect(self.onEditingFinsihed)
-        # self.disconnect(le, Qt.SIGNAL("textChanged(const QString &)"), self.onTextChanged)
-        # self.disconnect(le, Qt.SIGNAL("returnPressed()"), self.onReturnPresesd)
-        # self.disconnect(le, Qt.SIGNAL("editingFinished()"), self.onEditingFinsihed)
         le.deleteLater()
 
     def onTextChanged(self, arg):
@@ -87,8 +81,8 @@ class MAXQArrayLineEdit(QtWidgets.QWidget):
             self.emptyLabel.setText("")
         else:
             self.emptyLabel.setText("---")
-        if not isinstance(arr, np.ndarray):
-            return
+        # if not isinstance(arr, np.ndarray):
+        #     return
         while len(self._qlineedits) > len(arr):
             self._removeLineEdit()
         while len(arr) > len(self._qlineedits):
@@ -117,8 +111,7 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
         self.textChanged.connect(self.notifyValueChanged)
         self.returnPressed.connect(self.writeValue)
         self.editingFinished.connect(self._onEditingFinished)
-        self.valueChanged.connect(self.updatePendingOperations)
-        # self.connect(self, Qt.SIGNAL("valueChanged"), self.updatePendingOperations)
+        # self.valueChanged.connect(self.updatePendingOperations)
 
     def _fixnumberofelements(self):
         """
@@ -126,8 +119,8 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
         If the write value has less elements than the readvalue display the readvalue instead.
         """
         try:
-            read_value = self.getModelObj().getValueObj().value
-            write_value = self.getModelObj().getValueObj().w_value
+            read_value = self.getModelObj().getValueObj().rvalue
+            write_value = self.getModelObj().getValueObj().wvalue
             if len(read_value) != len(write_value):
                 self.setArray(read_value)
         except (AttributeError, TypeError):
@@ -150,7 +143,7 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
         """
         Get the value from the widget, with the same dtype as the read value
         """
-        attr_type = self.getModelObj().getValueObj().value.dtype
+        attr_type = self.getModelObj().getValueObj().rvalue.dtype
         arr = self.array(astype=attr_type)
         return arr
 
@@ -160,7 +153,7 @@ class MAXTaurusArrayLineEdit(MAXQArrayLineEdit, TaurusBaseWritableWidget):
         """
         model = self.getModelObj()
         try:
-            model_value = model.getValueObj().w_value
+            model_value = model.getValueObj().wvalue
             wigdet_value = self.getValue()
             if np.all(model.areStrValuesEqual(model_value, wigdet_value)) and len(model_value) == len(wigdet_value):
                 self._operations = []

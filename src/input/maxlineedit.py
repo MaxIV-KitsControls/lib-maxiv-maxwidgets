@@ -32,7 +32,7 @@ class MAXLineEdit(TaurusValueLineEdit):
         self._throttle_timer = QtCore.QTimer()
         self._throttle_timer.setInterval(200)
         self._throttle_timer.setSingleShot(True)
-        self.connect(self._throttle_timer, QtCore.SIGNAL("timeout()"), self._writeValue)
+        self._throttle_timer.timeout.connect(self._writeValue)
         self.w_value_trigger.connect(self._updateWriteValue)
 
     def _stepBy(self, steps):
@@ -86,7 +86,7 @@ class MAXLineEdit(TaurusValueLineEdit):
             # taurus.core.taurusbasetypes.TaurusEventType.Periodic,
             # taurus.core.taurusbasetypes.TaurusEventType.Change):
             if not self._focus:
-                self._w_value = evt_value.w_value
+                self._w_value = evt_value.wvalue
                 self.w_value_trigger.emit()
         elif evt_type in (EventType.ATTR_CONF_EVENT,
                           EventType.QUALITY_EVENT):
