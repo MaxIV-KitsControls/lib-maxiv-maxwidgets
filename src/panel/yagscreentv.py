@@ -1,21 +1,16 @@
 import sys
-import PyTango
-try:
-    from taurus.qt import Qt, QtGui
-except ImportError:
-    from taurus.external.qt import Qt, QtGui
-from taurus.qt.qtgui.container import TaurusWidget
+
+from tango import DevState
+from taurus.external.qt import Qt, QtWidgets
 from taurus.qt.qtgui.button import TaurusCommandButton
-from taurus.qt.qtgui.panel import TaurusDevicePanel
-from taurus.qt.qtgui.display import TaurusLed
-from taurus.qt.qtgui.panel.taurusvalue import \
-    TaurusValue, DefaultLabelWidget
-
+from taurus.qt.qtgui.container import TaurusWidget
 from taurus.qt.qtgui.dialog import TaurusMessageBox
-
-State = PyTango.DevState
-
+from taurus.qt.qtgui.display import TaurusLed
 from taurus.qt.qtgui.display.taurusled import _TaurusLedController
+from taurus.qt.qtgui.panel import TaurusDevicePanel
+from taurus.qt.qtgui.panel.taurusvalue import DefaultLabelWidget, TaurusValue
+
+State = DevState
 
 
 class _YAGLedController(_TaurusLedController):
@@ -46,22 +41,16 @@ class YAGScreenTVLabelWidget(DefaultLabelWidget):
 
     def contextMenuEvent(self, event):
         action_device_panel = Qt.QAction(self)
-        action_device_panel.setText('Show Device Panel')
-        self.connect(action_device_panel,
-                     Qt.SIGNAL('triggered()'),
-                     self.taurusValueBuddy().showDevicePanel)
+        action_device_panel.setText("Show Device Panel")
+        action_device_panel.triggered.connect(self.taurusValueBuddy().showDevicePanel)
 
         action_move_in = Qt.QAction(self)
-        action_move_in.setText('Move In')
-        self.connect(action_move_in,
-                     Qt.SIGNAL('triggered()'),
-                     self.taurusValueBuddy().moveIn)
+        action_move_in.setText("Move In")
+        action_move_in.triggered.connect(self.taurusValueBuddy().moveIn)
 
         action_move_out = Qt.QAction(self)
-        action_move_out.setText('Move Out')
-        self.connect(action_move_out,
-                     Qt.SIGNAL('triggered()'),
-                     self.taurusValueBuddy().moveOut)
+        action_move_out.setText("Move Out")
+        action_move_out.triggered.connect(self.taurusValueBuddy().moveOut)
 
         menu = Qt.QMenu(self)
         menu.addAction(action_device_panel)
@@ -80,13 +69,12 @@ class YAGScreenTVReadWidget(TaurusWidget):
 
     def __init__(self, *args):
         TaurusWidget.__init__(self, *args)
-        self.setLayout(QtGui.QHBoxLayout())
-        self.layout().setMargin(0)
+        self.setLayout(QtWidgets.QHBoxLayout())
 
         led = YAGLed(self)
 
         led.setUseParentModel(True)
-        led.setModel('/State')
+        led.setModel("/State")
         led.getFormatedToolTip = self.getFormatedToolTip
         led.setSizePolicy(Qt.QSizePolicy.Fixed, Qt.QSizePolicy.Fixed)
 
@@ -101,18 +89,17 @@ class YAGScreenTVWriteWidget(TaurusWidget):
 
     def __init__(self, *args):
         TaurusWidget.__init__(self, *args)
-        self.setLayout(QtGui.QHBoxLayout())
-        self.layout().setMargin(0)
+        self.setLayout(QtWidgets.QHBoxLayout())
 
         self.moveInButton = TaurusCommandButton(self)
         self.moveInButton.setUseParentModel(True)
-        self.moveInButton.setCommand('MoveIn')
-        self.moveInButton.setCustomText('Move In')
+        self.moveInButton.setCommand("MoveIn")
+        self.moveInButton.setCustomText("Move In")
 
         self.moveOutButton = TaurusCommandButton(self)
         self.moveOutButton.setUseParentModel(True)
-        self.moveOutButton.setCommand('MoveOut')
-        self.moveOutButton.setCustomText('Move Out')
+        self.moveOutButton.setCommand("MoveOut")
+        self.moveOutButton.setCustomText("Move Out")
 
         self.layout().addWidget(self.moveInButton)
         self.layout().addWidget(self.moveOutButton)
@@ -125,14 +112,14 @@ class YAGScreenTV(TaurusValue):
         self.setLabelWidgetClass(YAGScreenTVLabelWidget)
         self.setReadWidgetClass(YAGScreenTVReadWidget)
         self.setWriteWidgetClass(YAGScreenTVWriteWidget)
-        self.setLabelConfig('dev_name')
+        self.setLabelConfig("dev_name")
 
     def getFormatedToolTip(self, cache):
         device = self.getModelObj()
-        tool_tip = [('name', self.getModel())]
+        tool_tip = [("name", self.getModel())]
         if device:
             try:
-                tool_tip.append(('status', device.Status()))
+                tool_tip.append(("status", device.Status()))
             except:
                 pass
 
@@ -187,5 +174,6 @@ def main():
 
     sys.exit(app.exec_())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

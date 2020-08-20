@@ -1,15 +1,12 @@
 import taurus
-
 from guiqwt.plot import ImageWindow
 from guiqwt.styles import ImageParam
-
-from taurus.qt import Qt
 from taurus.qt.qtgui.base import TaurusBaseWidget
-from taurus.qt.qtgui.extra_guiqwt.image import TaurusEncodedImageItem
 from taurus.qt.qtgui.dialog import TaurusMessageBox
+from taurus.qt.qtgui.extra_guiqwt.image import TaurusEncodedImageItem
 
-#from tools import StartTool, StopTool, SettingsTool
-from maxwidgets.extra_guiqwt.tools import StartTool, StopTool, SettingsTool
+from maxwidgets.extra_guiqwt.tools import SettingsTool, StartTool, StopTool
+
 
 def alert_problems(meth):
     def _alert_problems(self, *args, **kws):
@@ -43,7 +40,7 @@ class BeamViewer(ImageWindow, TaurusBaseWidget):
         self.call__init__(ImageWindow, *args, **kwargs)
         self.call__init__(TaurusBaseWidget, self.__class__.__name__)
         self.image = None
-        self.acq_status = ''
+        self.acq_status = ""
         self.acq_status_attr = None
         self.frame_number = -1
         self.frame_number_attr = None
@@ -69,9 +66,7 @@ class BeamViewer(ImageWindow, TaurusBaseWidget):
         plot = self.get_plot()
 
         if self.image is not None:
-            self.disconnect(self.image.getSignaller(),
-                            Qt.SIGNAL("dataChanged"),
-                            self.update_cross_sections)
+            self.image.getSignaller().dataChanged.disconnect(self.update_cross_sections)
             plot.del_item(self.image)
             del self.image
         
@@ -80,33 +75,31 @@ class BeamViewer(ImageWindow, TaurusBaseWidget):
         if model is None:
             return
 
-        beamviewer = self.getPluginDevice('beamviewer')
+        beamviewer = self.getPluginDevice("beamviewer")
         if not beamviewer:
             return
 
-        image_attr = beamviewer.getAttribute('VideoImage')
+        image_attr = beamviewer.getAttribute("VideoImage")
 
         param = ImageParam()
-        param.interpolation = 0 # None (nearest pixel)
+        param.interpolation = 0  # None (nearest pixel)
 
         self.image = LimaVideoImageItem(param)
         self.image.setModel(image_attr)
-        
-        self.connect(self.image.getSignaller(),
-                     Qt.SIGNAL("dataChanged"),
-                     self.update_cross_sections)
+
+        self.image.getSignaller().dataChanged.connect(self.update_cross_sections)
 
         plot.add_item(self.image)
         self.registerEvents()
     
     def registerEvents(self):
         camera = self.getCamera()
-        beamviewer = self.getPluginDevice('beamviewer')
+        beamviewer = self.getPluginDevice("beamviewer")
         
-        self.acq_status_attr = camera.getAttribute('acq_status')
+        self.acq_status_attr = camera.getAttribute("acq_status")
         self.acq_status_attr.addListener(self)
         
-        self.frame_number_attr = beamviewer.getAttribute('FrameNumber')
+        self.frame_number_attr = beamviewer.getAttribute("FrameNumber")
         self.frame_number_attr.addListener(self)
 
     def unregisterEvents(self):
@@ -119,16 +112,16 @@ class BeamViewer(ImageWindow, TaurusBaseWidget):
             self.frame_number_attr = None
 
     def handleEvent(self, src, evt_type, evt_value):
-        if not hasattr(evt_value, 'value'):
+        if not hasattr(evt_value, "value"):
             return
 
         if src is self.acq_status_attr:
-            self.acq_status = evt_value.value
+            self.acq_status = evt_value.rvalue
 
         if src is self.frame_number_attr:
-            self.frame_number = evt_value.value
+            self.frame_number = evt_value.rvalue
                 
-        msg = 'Camera status: %s  Frame number: %d' % (self.acq_status, self.frame_number)
+        msg = f"Camera status: {self.acq_status}  Frame number: {self.frame_number}"
         self.statusBar().showMessage(msg)
     
     def getCamera(self):
@@ -144,9 +137,9 @@ class BeamViewer(ImageWindow, TaurusBaseWidget):
     @classmethod
     def getQtDesignerPluginInfo(cls):
         ret = TaurusBaseWidget.getQtDesignerPluginInfo()
-        ret['group'] = 'MAX-lab Taurus Widgets'
-        ret['module'] = 'maxwidgets.extra_guiqwt'
-        ret['icon'] = ':/designer/qwtplot.png'
+        ret["group"] = "MAX-lab Taurus Widgets"
+        ret["module"] = "maxwidgets.extra_guiqwt"
+        ret["icon"] = ":/designer/qwtplot.png"
         return ret
         
 
@@ -163,7 +156,7 @@ def main():
         
     args = app.get_command_line_args()
 
-    widget = BeamViewer(toolbar=True, options={'show_contrast' : True})
+    widget = BeamViewer(toolbar=True, options={"show_contrast": True})
 
     if len(args) < 1:
         parser.print_help()
@@ -174,5 +167,6 @@ def main():
         
     sys.exit(app.exec_())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

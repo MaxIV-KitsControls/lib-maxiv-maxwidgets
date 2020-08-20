@@ -1,17 +1,15 @@
 #!/usr/bin/env python
 import os
-
-from distutils.core import setup
 from distutils.command.build_py import build_py as _build_py
 from distutils.command.install_data import install_data as _install_data
+from distutils.core import setup
 
-packages= [ 'maxwidgets'
-          , 'maxwidgets.extra_guiqwt'
-          , 'maxwidgets.extra_guiqwt.ui'
-          , 'maxwidgets.input'
-          , 'maxwidgets.display'
-          , 'maxwidgets.panel'
-          ]
+packages = ['maxwidgets',
+            'maxwidgets.extra_guiqwt',
+            'maxwidgets.extra_guiqwt.ui',
+            'maxwidgets.input',
+            'maxwidgets.display',
+            'maxwidgets.panel']
 
 env_script = 'maxwidgets.sh'
 env_script_src = """
@@ -30,6 +28,7 @@ done
 export TAURUSQTDESIGNERPATH
 """
 
+
 def ui_to_py(arg, dirname, names):
     cwd = os.getcwd()
     os.chdir(dirname)
@@ -44,7 +43,7 @@ def ui_to_py(arg, dirname, names):
 
         src = os.path.join(dirname, name)
         dst = os.path.join(dirname, pyname)
-        print ok and "[OK]" or "[FAIL]", src, '->', dst
+        print(ok and "[OK]" or "[FAIL]", src, '->', dst)
 
     os.chdir(cwd)
 
@@ -63,7 +62,7 @@ class install_data(_install_data):
 
     def _create_env_script(self):
         install_cmd = self.get_finalized_command('install')
-        root   = getattr(install_cmd, 'root')
+        root = getattr(install_cmd, 'root')
         libdir = getattr(install_cmd, 'install_lib')
 
         if root is not None:
@@ -87,12 +86,12 @@ class install_data(_install_data):
         self._create_env_script()
         _install_data.run(self)
 
-setup(name = 'python-maxwidgets',
-      version = '0.9.6',
-      description = 'A collection of reusable Taurus widgets',
-      packages = packages,
-      package_dir = {'maxwidgets' : 'src'},
-      data_files = [('/etc/profile.d', [env_script])],
-      cmdclass = {#'build_py' : build_py,
-                  'install_data' : install_data},
-     )
+
+setup(name='python3-maxwidgets',
+      version='1.0.0',
+      description='A collection of reusable Taurus widgets',
+      packages=packages,
+      package_dir={'maxwidgets': 'src'},
+      data_files=[('/etc/profile.d', [env_script])],
+      cmdclass={  # 'build_py' : build_py,
+                  'install_data': install_data},)

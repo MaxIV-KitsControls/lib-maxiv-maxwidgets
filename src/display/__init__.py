@@ -1,1 +1,1 @@
-from maxvaluebar import MAXValueBar
+from .maxvaluebar import MAXValueBar

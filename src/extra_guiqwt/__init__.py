@@ -1,2 +1,1 @@
-
-from beamviewer import BeamViewer
+from .beamviewer import BeamViewer
