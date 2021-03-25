@@ -12,6 +12,7 @@ import PyTango
 from taurus import Configuration
 from taurus.core.taurusoperation import WriteAttrOperation
 from taurus.qt.qtgui.base import TaurusBaseWritableWidget
+from taurus.core.units import Q_  # import the taurus Quantity factory
 try:
     from taurus.qt.qtgui.panel import TaurusWidget
 except ImportError:
@@ -53,6 +54,9 @@ class ValueBarWidget(QtGui.QWidget):
             self.repaint()
 
     def setWriteValue(self, value):
+        #added for taurus 4 compatibility: value can be a Quantity (Q_)
+        if isinstance(value, Q_):
+            value = value.magnitude
         if value != self.write_value:
             self.write_value = value
             self.repaint()
@@ -197,8 +201,12 @@ class ValueBarWidget(QtGui.QWidget):
 
 def float_or_none(value):
     try:
-        return float(value)
+        result = float(value)
     except (ValueError, TypeError):
+        return None
+    if result not in [float('inf'), float('-inf'), float('NaN')]:
+        return result
+    else:
         return None
 
 
@@ -279,12 +287,12 @@ class MAXValueBar(QtGui.QWidget, TaurusBaseWritableWidget):
     def updateConfig(self, conf):
         # Note: could be inefficient with lots of redraws?
         self.valuebar.tick_format = conf.format
-        self.valuebar.setMaximum(float_or_none(conf.max_value))
-        self.valuebar.setMinimum(float_or_none(conf.min_value))
-        self.valuebar.setWarningHigh(float_or_none(conf.alarms.max_warning))
-        self.valuebar.setWarningLow(float_or_none(conf.alarms.min_warning))
-        self.valuebar.setAlarmHigh(float_or_none(conf.alarms.max_alarm))
-        self.valuebar.setAlarmLow(float_or_none(conf.alarms.min_alarm))
+        self.valuebar.setMaximum(float_or_none(conf.getLimits()[1].magnitude))
+        self.valuebar.setMinimum(float_or_none(conf.getLimits()[0].magnitude))
+        self.valuebar.setWarningHigh(float_or_none(conf.getWarnings()[1].magnitude))
+        self.valuebar.setWarningLow(float_or_none(conf.getWarnings()[0].magnitude))
+        self.valuebar.setAlarmHigh(float_or_none(conf.getAlarms()[1].magnitude))
+        self.valuebar.setAlarmLow(float_or_none(conf.getAlarms()[0].magnitude))
 
         # update the wheel delta to correspond to the LSD
         digits = self._decimalDigits(conf.format)
