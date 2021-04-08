@@ -97,7 +97,10 @@ setup(
     author_email="kits-sw@maxiv.lu.se",
     license="GPLv3",
     url="http://www.maxiv.lu.se",
-    packages=['maxwidgets'],
+    packages=['maxwidgets.input',
+              'maxwidgets.display',
+              'maxwidgets.panel'],
+    package_dir = {'': 'src'}
     #include_package_data=True,
     install_requires=["taurus"],
     #package_data={' ': [ , , ]}
