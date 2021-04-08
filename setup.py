@@ -100,7 +100,7 @@ setup(
     packages=['maxwidgets.input',
               'maxwidgets.display',
               'maxwidgets.panel'],
-    package_dir = {'': 'src'},
+    package_dir = {'maxwidgets': 'src'},
     #include_package_data=True,
     install_requires=["taurus"],
     #package_data={' ': [ , , ]}
