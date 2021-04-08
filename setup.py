@@ -90,7 +90,7 @@ from setuptools import setup
 #        _install_data.run(self)
 
 setup(
-    name="python-maxwidgets",
+    name="maxwidgets",
     version="0.9.6",
     description="A collection of reusable Taurus widgets",
     author="KITS controls",
