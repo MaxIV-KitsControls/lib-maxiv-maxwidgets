@@ -18,5 +18,5 @@ setup(
               'maxwidgets.extra_guiqwt.ui'],
     package_dir = {'maxwidgets': 'src'},
     install_requires=["taurus"],
-    data_files = [('/etc/profile.d/ ': ['maxwidgets.sh'])]
+    data_files = [('/etc/profile.d/', ['maxwidgets.sh'])]
 )
