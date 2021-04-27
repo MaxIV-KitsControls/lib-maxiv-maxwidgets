@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name="maxwidgets",
-    version="0.9.6",
+    version="0.9.7",
     description="A collection of reusable Taurus widgets",
     author="KITS controls",
     author_email="kits-sw@maxiv.lu.se",
