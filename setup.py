@@ -44,7 +44,7 @@ def ui_to_py(arg, dirname, names):
 
         src = os.path.join(dirname, name)
         dst = os.path.join(dirname, pyname)
-        print ok and "[OK]" or "[FAIL]", src, '->', dst
+        print(ok and "[OK]" or "[FAIL]", src, '->', dst)
 
     os.chdir(cwd)
 
