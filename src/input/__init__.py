@@ -1,4 +1,4 @@
 
-from maxlineedit import MAXLineEdit
-from maxspinbox  import MAXSpinBox
-from maxarraylineedit import MAXTaurusArrayLineEdit
+from maxwidgets.input.maxlineedit import MAXLineEdit
+from maxwidgets.input.maxspinbox  import MAXSpinBox
+from maxwidgets.input.maxarraylineedit import MAXTaurusArrayLineEdit

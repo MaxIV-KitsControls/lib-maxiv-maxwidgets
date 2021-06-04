@@ -35,7 +35,7 @@ class MAXLineEdit (TaurusValueLineEdit):
         self._throttle_timer = QtCore.QTimer()
         self._throttle_timer.setInterval(200)
         self._throttle_timer.setSingleShot(True)
-        self.connect(self._throttle_timer, QtCore.SIGNAL("timeout()"), self._writeValue)
+        #self.connect(self._throttle_timer, QtCore.SIGNAL("timeout()"), self._writeValue)
         self.w_value_trigger.connect(self._updateWriteValue)
 
     def _stepBy(self, steps):
